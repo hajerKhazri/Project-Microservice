@@ -1,0 +1,92 @@
+<section class="page-wrap">
+  <div class="project-card card-style">
+    <div class="head">
+      <h1>{{ isEditMode ? 'Modifier Projet' : 'Ajouter Projet' }}</h1>
+      <p>
+        {{ isEditMode ? 'Mettez à jour les informations du projet' : 'Remplissez les champs pour publier un nouveau projet' }}
+      </p>
+    </div>
+
+    <div *ngIf="errorMessage" class="form-error-summary">
+      {{ errorMessage }}
+    </div>
+
+    <form [formGroup]="projetForm" (ngSubmit)="onSubmit()" class="form">
+      <div class="field">
+        <label>
+          Titre <span class="required">*</span>
+        </label>
+        <input
+          type="text"
+          formControlName="title"
+          placeholder="Ex: Développement application web"
+        />
+        <small class="hint"></small>
+
+        <div class="error-hint" *ngIf="f['title'].touched && f['title'].errors?.['required']">
+          Le titre est obligatoire.
+        </div>
+        <div class="error-hint" *ngIf="f['title'].touched && f['title'].errors?.['minlength']">
+          Le titre doit contenir au moins 4 caractères.
+        </div>
+        <div class="error-hint" *ngIf="f['title'].touched && f['title'].errors?.['firstLetterUppercase']">
+          Le titre doit commencer par une majuscule.
+        </div>
+      </div>
+
+      <div class="field">
+        <label>
+          Description <span class="required">*</span>
+        </label>
+        <textarea
+          rows="5"
+          formControlName="description"
+          placeholder="Décrivez le projet..."
+        ></textarea>
+
+        <div class="char-counter">
+          {{ projetForm.get('description')?.value?.length || 0 }}/1000
+        </div>
+
+        <div class="error-hint" *ngIf="f['description'].touched && f['description'].errors?.['required']">
+          La description est obligatoire.
+        </div>
+        <div class="error-hint" *ngIf="f['description'].touched && f['description'].errors?.['maxlength']">
+          La description ne doit pas dépasser 1000 caractères.
+        </div>
+      </div>
+
+      <div class="two">
+        <div class="field">
+          <label>
+            Date <span class="required">*</span>
+          </label>
+          <input type="date" formControlName="date" />
+          <div class="error-hint" *ngIf="f['date'].touched && f['date'].errors?.['required']">
+            La date est obligatoire.
+          </div>
+        </div>
+
+        <div class="field">
+          <label>
+            Domaine <span class="required">*</span>
+          </label>
+          <select formControlName="domaine">
+            <option value="">-- Choisir un domaine --</option>
+            <option *ngFor="let d of domaines" [value]="d">{{ d }}</option>
+          </select>
+          <div class="error-hint" *ngIf="f['domaine'].touched && f['domaine'].errors?.['required']">
+            Le domaine est obligatoire.
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <a routerLink="/projets" class="btn ghost-btn">Annuler</a>
+        <button type="submit" class="btn primary-btn">
+          {{ isEditMode ? 'Modifier' : 'Ajouter' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</section>

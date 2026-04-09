@@ -1,0 +1,90 @@
+<section class="list-page">
+  <div class="container">
+    <div class="head-bar">
+      <div>
+        <h1>Liste des Projets</h1>
+        <p>Gérez tous les projets publiés.</p>
+        <small class="favorites-info">Favoris : {{ favoriteCount }}</small>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <div class="filter-group">
+        <input
+          type="text"
+          [(ngModel)]="searchTerm"
+          (input)="applyFilters()"
+          placeholder="Rechercher par titre..."
+          class="filter-input"
+        />
+      </div>
+
+      <div class="filter-group">
+        <select [(ngModel)]="selectedDomaine" (change)="applyFilters()" class="filter-select">
+          <option value="">Tous les domaines</option>
+          <option *ngFor="let d of domaines" [value]="d">{{ d }}</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <select [(ngModel)]="selectedSort" (change)="applyFilters()" class="filter-select">
+          <option value="">Trier par</option>
+          <option value="title-asc">Titre A → Z</option>
+          <option value="title-desc">Titre Z → A</option>
+          <option value="date-asc">Date croissante</option>
+          <option value="date-desc">Date décroissante</option>
+          <option value="budget-asc">Budget croissant</option>
+          <option value="budget-desc">Budget décroissant</option>
+        </select>
+      </div>
+
+      <div class="filter-group favorites-toggle">
+        <label>
+          <input type="checkbox" [(ngModel)]="favoritesOnly" (change)="applyFilters()" />
+          Favoris seulement
+        </label>
+      </div>
+
+      <div class="filter-group">
+        <button class="btn reset-btn" (click)="resetFilters()">Réinitialiser</button>
+      </div>
+    </div>
+
+    <div *ngIf="loading" class="info-box">Chargement...</div>
+    <div *ngIf="errorMessage" class="form-error-summary">{{ errorMessage }}</div>
+
+    <div class="grid" *ngIf="!loading && filteredProjets.length > 0">
+      <div class="project-item" *ngFor="let projet of filteredProjets">
+        <div class="project-top">
+          <span class="badge">{{ projet.domaine }}</span>
+
+          <button
+            type="button"
+            class="favorite-btn"
+            (click)="toggleFavorite(projet)"
+            [title]="projet.isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'">
+            {{ projet.isFavorite ? '♥' : '♡' }}
+          </button>
+        </div>
+
+        <span class="date">{{ projet.date }}</span>
+
+        <h3>{{ projet.title }}</h3>
+        <p>{{ projet.description }}</p>
+
+        <div class="budget-preview">
+          Budget estimé : <strong>{{ projet.estimatedBudget }} TND</strong>
+        </div>
+
+        <div class="actions">
+          <a [routerLink]="['/projets', projet.id]" class="btn ghost-btn">Détails</a>
+          <a [routerLink]="['', projet.id]" class="btn ghost-btn">Apply</a>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="!loading && filteredProjets.length === 0" class="info-box">
+      Aucun projet trouvé.
+    </div>
+  </div>
+</section>

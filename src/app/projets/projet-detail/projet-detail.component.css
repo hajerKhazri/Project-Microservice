@@ -1,0 +1,135 @@
+.detail-page {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 16px;
+  background: linear-gradient(180deg, var(--bg), var(--bg2));
+}
+
+.detail-card {
+  width: 100%;
+  max-width: 700px;
+  padding: 24px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 20px;
+  box-shadow: 0 18px 40px rgba(0,0,0,.18);
+  color: #fff;
+}
+
+.head {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.head h1 {
+  margin: 0 0 6px;
+  font-size: 26px;
+  font-weight: 900;
+}
+
+.head p {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--muted);
+}
+
+.detail-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field-view {
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.field-view .label {
+  display: block;
+  font-size: 12px;
+  font-weight: 900;
+  color: rgba(255,255,255,.7);
+  margin-bottom: 6px;
+}
+
+.field-view p {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.5;
+}
+
+.two-view {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn {
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.primary-btn {
+  background: var(--primary);
+  color: #fff;
+}
+
+.ghost-btn {
+  background: transparent;
+  border-color: rgba(255,255,255,.22);
+  color: #fff;
+}
+
+.info-box {
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 14px;
+  padding: 14px 16px;
+  color: #fff;
+  font-weight: 700;
+}
+
+.form-error-summary {
+  background: rgba(255, 107, 107, 0.15);
+  border-left: 4px solid #ff6b6b;
+  padding: 12px 16px;
+  margin: 20px 0;
+  border-radius: 4px;
+  color: #ff6b6b;
+  font-weight: 600;
+}
+
+@media (max-width: 520px) {
+  .two-view {
+    grid-template-columns: 1fr;
+  }
+}
+.budget-box {
+  border: 1px solid rgba(242, 153, 74, 0.4);
+  background: rgba(242, 153, 74, 0.12);
+}
+
+.budget-box p {
+  color: #f4a340;
+  font-size: 22px;
+  font-weight: 900;
+}
