@@ -7,6 +7,7 @@
 
     <nav class="nav-links" aria-label="Navigation">
       <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
+      <a routerLink="/users" routerLinkActive="active">Users</a>
       <a routerLink="/skills" routerLinkActive="active">Skills</a>
       <a routerLink="/jobs" routerLinkActive="active">Browse Jobs</a>
       <a href="#applications">Applications</a>
@@ -15,6 +16,7 @@
     </nav>
 
     <div class="nav-actions">
+      <a routerLink="/users" class="btn primary">Users</a>
       <a routerLink="/skills" class="btn primary">Skills</a>
       <a routerLink="/jobs" class="btn ghost">Jobs</a>
     </div>
@@ -28,6 +30,7 @@
       <p>Freelancers apply to your projects, you choose the best profile easily.</p>
 
       <div class="hero-cta">
+        <a routerLink="/users" class="btn primary">Manage Users</a>
         <a routerLink="/jobs" class="btn primary">Browse Jobs</a>
         <a href="#applications" class="btn orange">Apply Now</a>
         <a routerLink="/skills" class="btn ghost light">Manage Skills</a>
