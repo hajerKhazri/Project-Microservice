@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FreeLink – Browse Jobs</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="jobs.css" />
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <div class="container nav-inner">
+      <a class="brand" href="#">
+        <span class="logo" aria-hidden="true"></span>
+        <span>FreeLink</span>
+      </a>
+
+      <nav class="nav-links" aria-label="Navigation">
+        <a href="#">Home</a>
+        <a class="active" href="#">Browse Jobs</a>
+        <a href="#">Post a Job</a>
+        <a href="#">How it works</a>
+        <a href="#">Contact</a>
+      </nav>
+
+      <div class="nav-actions">
+        <a class="btn orange" href="#">Sign up as a Freelancer</a>
+        <a class="btn primary" href="#">Post a Job</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container hero-inner">
+      <h1>All Jobs</h1>
+      <p>Find your next opportunity from our listings.</p>
+    </div>
+  </section>
+
+  <!-- CONTENT -->
+  <main class="page">
+    <div class="container grid">
+
+      <!-- FILTERS -->
+      <aside class="filters">
+        <h2>Filters</h2>
+
+        <div class="filter-block">
+          <div class="filter-title">Category</div>
+
+          <label class="check">
+            <input type="checkbox" checked>
+            <span>Front-end Developer</span>
+          </label>
+
+          <label class="check">
+            <input type="checkbox">
+            <span>Back-end Developer</span>
+          </label>
+
+          <label class="check">
+            <input type="checkbox">
+            <span>UI/UX Designer</span>
+          </label>
+
+          <label class="check">
+            <input type="checkbox">
+            <span>Mobile Developer</span>
+          </label>
+
+          <label class="check">
+            <input type="checkbox">
+            <span>Data / AI</span>
+          </label>
+
+          <label class="check">
+            <input type="checkbox">
+            <span>Active Jobs</span>
+          </label>
+        </div>
+
+        <div class="filter-block">
+          <div class="filter-title">Budget (per hour)</div>
+          <div class="pill-row">
+            <button class="pill active" type="button">$10 – $30</button>
+            <button class="pill" type="button">$30 – $60</button>
+            <button class="pill" type="button">$60+</button>
+          </div>
+        </div>
+
+        <div class="filter-block">
+          <div class="filter-title">Location</div>
+          <div class="select">
+            <span class="pin" aria-hidden="true">📍</span>
+            <select>
+              <option selected>Any location</option>
+              <option>Tunis</option>
+              <option>Sousse</option>
+              <option>Remote</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="filter-block">
+          <div class="filter-title">Type</div>
+          <div class="pill-row">
+            <button class="pill active" type="button">Remote</button>
+            <button class="pill" type="button">Hybrid</button>
+            <button class="pill" type="button">On-site</button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- JOB LIST -->
+      <section class="list">
+
+        <div class="list-head">
+          <div class="result">
+            <strong>12</strong> jobs found
+          </div>
+
+          <div class="search-sort">
+            <input class="search" type="text" placeholder="Search jobs (React, UI/UX, Spring...)" />
+            <select class="sort">
+              <option selected>Sort: Latest</option>
+              <option>Sort: Budget (High)</option>
+              <option>Sort: Budget (Low)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- JOB CARD 1 -->
+        <article class="job">
+          <div class="job-left">
+            <div class="job-top">
+              <h3>Front-end Developer (React)</h3>
+              <span class="type remote">Remote</span>
+            </div>
+
+            <div class="meta">
+              <div class="meta-item">
+                <span class="label">Client:</span> FreeLink
+              </div>
+
+              <div class="meta-item budget">
+                <span class="label">Budget:</span> $20 – $50 / hour
+              </div>
+            </div>
+
+            <div class="tags">
+              <span class="tag">HTML</span>
+              <span class="tag">CSS</span>
+              <span class="tag">React</span>
+            </div>
+
+            <p class="desc">
+              React front-end developer with solid experience building modern web applications.
+              You will work on real projects and ensure performance, maintainability, and clean UI.
+            </p>
+          </div>
+
+          <div class="job-right">
+            <a href="#" class="apply">Apply</a>
+            <a href="#" class="details">Details</a>
+          </div>
+        </article>
+
+        <!-- JOB CARD 2 -->
+        <article class="job">
+          <div class="job-left">
+            <div class="job-top">
+              <h3>UI/UX Designer</h3>
+              <span class="type hybrid">Hybrid</span>
+            </div>
+
+            <div class="meta">
+              <div class="meta-item">
+                <span class="label">Client:</span> FreeLink
+              </div>
+
+              <div class="meta-item budget">
+                <span class="label">Budget:</span> $15 – $40 / hour
+              </div>
+            </div>
+
+            <div class="tags">
+              <span class="tag">Figma</span>
+              <span class="tag">UX</span>
+              <span class="tag">UI</span>
+            </div>
+
+            <p class="desc">
+              UI/UX designer specialized in modern, intuitive interfaces for SaaS applications.
+              Improve user journeys from wireframes to final design.
+            </p>
+          </div>
+
+          <div class="job-right">
+            <a href="#" class="apply">Apply</a>
+            <a href="#" class="details">Details</a>
+          </div>
+        </article>
+
+        <!-- JOB CARD 3 -->
+        <article class="job">
+          <div class="job-left">
+            <div class="job-top">
+              <h3>UI/UX Developer</h3>
+              <span class="type onsite">On-site</span>
+            </div>
+
+            <div class="meta">
+              <div class="meta-item">
+                <span class="label">Client:</span> FreeLink
+              </div>
+
+              <div class="meta-item budget">
+                <span class="label">Budget:</span> $18 – $45 / hour
+              </div>
+            </div>
+
+            <div class="tags">
+              <span class="tag">HTML</span>
+              <span class="tag">CSS</span>
+              <span class="tag">React</span>
+            </div>
+
+            <p class="desc">
+              Versatile UI/UX developer able to design clean interfaces and integrate them with
+              strong attention to performance and responsiveness.
+            </p>
+          </div>
+
+          <div class="job-right">
+            <a href="#" class="apply">Apply</a>
+            <a href="#" class="details">Details</a>
+          </div>
+        </article>
+
+        <!-- JOB CARD 4 -->
+        <article class="job">
+          <div class="job-left">
+            <div class="job-top">
+              <h3>Back-end Developer (Spring Boot)</h3>
+              <span class="type remote">Remote</span>
+            </div>
+
+            <div class="meta">
+              <div class="meta-item">
+                <span class="label">Client:</span> FreeLink
+              </div>
+
+              <div class="meta-item budget">
+                <span class="label">Budget:</span> $25 – $60 / hour
+              </div>
+            </div>
+
+            <div class="tags">
+              <span class="tag">Spring</span>
+              <span class="tag">REST API</span>
+              <span class="tag">JWT</span>
+              <span class="tag">PostgreSQL</span>
+            </div>
+
+            <p class="desc">
+              Build secure REST APIs with Spring Boot. You will handle authentication, database design,
+              and clean architecture best practices.
+            </p>
+          </div>
+
+          <div class="job-right">
+            <a href="#" class="apply">Apply</a>
+            <a href="#" class="details">Details</a>
+          </div>
+        </article>
+
+      </section>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">FAQ</a>
+      </div>
+
+      <div class="social">
+        <a href="#" aria-label="Facebook">f</a>
+        <a href="#" aria-label="X">x</a>
+        <a href="#" aria-label="LinkedIn">in</a>
+        <a href="#" aria-label="Instagram">ig</a>
+      </div>
+
+      <div class="copy">© 2026 – FreeLink. All rights reserved.</div>
+    </div>
+  </footer>
+
+</body>
+</html>
