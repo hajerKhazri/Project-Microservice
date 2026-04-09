@@ -1,0 +1,32 @@
+<div class="fichier-section">
+  <div class="fichier-header">
+    <h3>Fichiers</h3>
+    <button mat-flat-button color="primary" (click)="fileInput.click()">
+      <mat-icon>upload_file</mat-icon> Uploader
+    </button>
+    <input #fileInput type="file" hidden (change)="onFileSelected($event)">
+  </div>
+
+  <mat-progress-bar *ngIf="uploading" mode="indeterminate" class="upload-bar"></mat-progress-bar>
+
+  <div *ngIf="fichiers.length === 0" class="empty-files">
+    <mat-icon>folder_open</mat-icon>
+    <p>Aucun fichier attaché</p>
+  </div>
+
+  <mat-list *ngIf="fichiers.length > 0">
+    <mat-list-item *ngFor="let f of fichiers" class="fichier-item">
+      <mat-icon matListItemIcon>{{ getFileIcon(f.typeFichier) }}</mat-icon>
+      <span matListItemTitle>{{ f.nomFichier }}</span>
+      <span matListItemLine>{{ formatSize(f.tailleFichier) }} - {{ f.dateUpload | date:'dd/MM/yyyy HH:mm' }}</span>
+      <div matListItemMeta class="fichier-actions">
+        <button mat-icon-button (click)="downloadFichier(f)" matTooltip="Télécharger">
+          <mat-icon>download</mat-icon>
+        </button>
+        <button mat-icon-button color="warn" (click)="deleteFichier(f)" matTooltip="Supprimer">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    </mat-list-item>
+  </mat-list>
+</div>
