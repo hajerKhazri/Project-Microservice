@@ -1,0 +1,2 @@
+# This file is intentionally empty as configurations are fetched from Spring Cloud Config Server.
+# Local overrides can be added here.
