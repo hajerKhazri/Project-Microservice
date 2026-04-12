@@ -1,0 +1,228 @@
+<header class="navbar">
+  <div class="container nav-inner">
+    <a class="brand" routerLink="/">
+      <span class="logo" aria-hidden="true"></span>
+      <span>FreeLink</span>
+    </a>
+
+    <nav class="nav-links" aria-label="Navigation">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
+      <a routerLink="/users" routerLinkActive="active">Users</a>
+      <a routerLink="/skills" routerLinkActive="active">Skills</a>
+      <a routerLink="/jobs" routerLinkActive="active">Browse Jobs</a>
+      <a href="#applications">Applications</a>
+      <a href="#how">How it works</a>
+      <a href="#contact">Contact</a>
+    </nav>
+
+    <div class="nav-actions">
+      <a routerLink="/users" class="btn primary">Users</a>
+      <a routerLink="/skills" class="btn primary">Skills</a>
+      <a routerLink="/jobs" class="btn ghost">Jobs</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero dots">
+  <div class="container hero-inner">
+    <div class="hero-left">
+      <h1>Post your jobs and receive the best applications</h1>
+      <p>Freelancers apply to your projects, you choose the best profile easily.</p>
+
+      <div class="hero-cta">
+        <a routerLink="/users" class="btn primary">Manage Users</a>
+        <a routerLink="/jobs" class="btn primary">Browse Jobs</a>
+        <a href="#applications" class="btn orange">Apply Now</a>
+        <a routerLink="/skills" class="btn ghost light">Manage Skills</a>
+      </div>
+
+      <div class="hero-stats">
+        <div class="stat">
+          <strong>+1,200</strong>
+          <span>Freelancers</span>
+        </div>
+        <div class="stat">
+          <strong>+350</strong>
+          <span>Active Jobs</span>
+        </div>
+        <div class="stat">
+          <strong>24/7</strong>
+          <span>Support</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <article class="hero-card">
+        <div class="hero-card-top">
+          <span class="badge">New</span>
+          <span class="mini-title">Featured Job</span>
+        </div>
+
+        <h3>Web Developer (Symfony)</h3>
+        <p class="muted">E-commerce project - 1 month - Remote</p>
+
+        <div class="chips">
+          <span class="chip">Symfony</span>
+          <span class="chip">MySQL</span>
+          <span class="chip">API</span>
+        </div>
+
+        <div class="hero-card-actions">
+          <a routerLink="/jobs" class="btn small primary">Apply</a>
+          <a routerLink="/jobs" class="btn small ghost-card">Details</a>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<main class="section-dark">
+  <section class="container" id="how">
+    <h2 class="section-title">How it works</h2>
+
+    <div class="steps">
+      <article class="step">
+        <div class="icon">1</div>
+        <div class="label">
+          <strong>Post a job</strong>
+          <span>The client describes the need</span>
+        </div>
+      </article>
+
+      <article class="step">
+        <div class="icon">2</div>
+        <div class="label">
+          <strong>Receive applications</strong>
+          <span>Freelancers apply</span>
+        </div>
+      </article>
+
+      <article class="step">
+        <div class="icon">3</div>
+        <div class="label">
+          <strong>Choose and collaborate</strong>
+          <span>Start the project together</span>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="container section-block" id="offers">
+    <div class="section-head">
+      <h2 class="section-title">Available Jobs</h2>
+      <a class="link" routerLink="/jobs">View all -></a>
+    </div>
+
+    <div class="offer-grid">
+      <article class="offer">
+        <div class="offer-top">
+          <span class="tag">Remote</span>
+          <span class="salary">$300-$500</span>
+        </div>
+        <h3>UI/UX Designer</h3>
+        <p class="muted dark">Landing page and Figma mockups - 2 weeks</p>
+        <div class="chips">
+          <span class="chip">Figma</span>
+          <span class="chip">UX</span>
+          <span class="chip">Wireframes</span>
+        </div>
+      </article>
+
+      <article class="offer">
+        <div class="offer-top">
+          <span class="tag">Hybrid</span>
+          <span class="salary">$600-$900</span>
+        </div>
+        <h3>Backend Developer (Spring)</h3>
+        <p class="muted dark">REST API and security - 1 month</p>
+        <div class="chips">
+          <span class="chip">Spring</span>
+          <span class="chip">JWT</span>
+          <span class="chip">MySQL</span>
+        </div>
+      </article>
+
+      <article class="offer">
+        <div class="offer-top">
+          <span class="tag">Remote</span>
+          <span class="salary">$500-$800</span>
+        </div>
+        <h3>Web Developer (Symfony)</h3>
+        <p class="muted dark">E-commerce project - 1 month</p>
+        <div class="chips">
+          <span class="chip">Symfony</span>
+          <span class="chip">MySQL</span>
+          <span class="chip">API</span>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="container section-block" id="applications">
+    <div class="section-head">
+      <h2 class="section-title">Apply for a Job</h2>
+      <span class="hint">Fast - Simple - Professional</span>
+    </div>
+
+    <div class="form-wrap">
+      <form class="apply-form">
+        <div class="form-row">
+          <div class="field">
+            <label for="fullName">Full name</label>
+            <input id="fullName" type="text" placeholder="Ex: John Doe">
+          </div>
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" type="email" placeholder="Ex: john@email.com">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label for="position">Target position</label>
+            <select id="position">
+              <option>Web Developer (Symfony)</option>
+              <option>Backend Developer (Spring)</option>
+              <option>UI/UX Designer</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="portfolio">GitHub / professional link</label>
+            <input id="portfolio" type="text" placeholder="https://github.com/...">
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="message">Message</label>
+          <textarea id="message" rows="5" placeholder="Briefly explain your experience and availability..."></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn ghost-dark">Cancel</button>
+          <button type="submit" class="btn primary">Submit Application</button>
+        </div>
+      </form>
+
+      <aside class="tips">
+        <h3>Tips</h3>
+        <ul>
+          <li>Add your GitHub or professional link</li>
+          <li>Explain your experience in 3 or 4 lines</li>
+          <li>Be clear about your availability</li>
+        </ul>
+      </aside>
+    </div>
+  </section>
+</main>
+
+<footer id="contact">
+  <div class="container footer-inner">
+    <div class="footer-links">
+      <a href="#">Privacy Policy</a>
+      <a href="#">FAQ</a>
+      <a href="#">Contact</a>
+    </div>
+    <div class="footer-copy">Copyright 2026 - FreeLink. All rights reserved.</div>
+  </div>
+</footer>

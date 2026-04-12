@@ -1,0 +1,37 @@
+# OS / editor
+Thumbs.db
+.DS_Store
+.idea/
+**/.idea/
+.vscode/
+**/.vscode/
+*.iml
+*.ipr
+*.iws
+**/.git.embedded-backup/
+
+# Node / Angular
+**/node_modules/
+**/dist/
+**/.angular/
+**/.npm-cache/
+npm-debug.log*
+yarn-error.log*
+
+# Java / Maven / Gradle
+**/target/
+**/build/
+
+# Python
+**/.venv/
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+**/staticfiles/
+**/.pytest_cache/
+**/.env
+
+# Runtime / uploads
+**/uploads/
+*.log

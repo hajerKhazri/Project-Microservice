@@ -1,0 +1,71 @@
+<div *ngIf="formation" class="detail-container">
+  <div class="page-header">
+    <h1>{{ formation.titre }}</h1>
+    <div class="actions">
+      <a mat-flat-button color="primary" [routerLink]="['/formations', formation.id, 'edit']">
+        <mat-icon>edit</mat-icon> Modifier
+      </a>
+      <button mat-flat-button color="warn" (click)="deleteFormation()">
+        <mat-icon>delete</mat-icon> Supprimer
+      </button>
+    </div>
+  </div>
+
+  <mat-card>
+    <mat-card-content>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="label">Statut</span>
+          <span class="badge" [ngClass]="'badge-' + formation.statut">
+            {{ getStatutLabel(formation.statut) }}
+          </span>
+        </div>
+
+        <div class="info-item">
+          <span class="label">Avancement</span>
+          <div class="progress-wrapper">
+            <mat-progress-bar mode="determinate"
+              [value]="formation.avancement"
+              [color]="getProgressColor(formation.avancement)">
+            </mat-progress-bar>
+            <span class="progress-value">{{ formation.avancement }}%</span>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <span class="label">Date de début</span>
+          <span>{{ formation.dateDebut | date:'dd/MM/yyyy' : '' : '' }}</span>
+        </div>
+
+        <div class="info-item">
+          <span class="label">Date de fin</span>
+          <span>{{ formation.dateFin | date:'dd/MM/yyyy' : '' : '' }}</span>
+        </div>
+
+        <div class="info-item" *ngIf="formation.createdAt">
+          <span class="label">Créée le</span>
+          <span>{{ formation.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+      </div>
+
+      <mat-divider class="divider"></mat-divider>
+
+      <div class="description" *ngIf="formation.description">
+        <h3>Description</h3>
+        <p>{{ formation.description }}</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="fichiers-card">
+    <mat-card-content>
+      <app-fichier-manager [formationId]="formation.id!"></app-fichier-manager>
+    </mat-card-content>
+  </mat-card>
+
+  <div class="back-link">
+    <a mat-button routerLink="/formations">
+      <mat-icon>arrow_back</mat-icon> Retour à la liste
+    </a>
+  </div>
+</div>

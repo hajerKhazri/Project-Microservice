@@ -1,0 +1,77 @@
+<div class="page-header">
+  <h1>Formations</h1>
+  <a mat-flat-button color="primary" routerLink="/formations/new">
+    <mat-icon>add</mat-icon> Nouvelle formation
+  </a>
+</div>
+
+<!-- Loading spinner -->
+<div *ngIf="loading" class="loading-container">
+  <mat-spinner diameter="48"></mat-spinner>
+  <p>Chargement des formations...</p>
+</div>
+
+<!-- Empty state (only after loading) -->
+<mat-card *ngIf="!loading && formations.length === 0" class="empty-state">
+  <mat-card-content>
+    <mat-icon class="empty-icon">school</mat-icon>
+    <p>Aucune formation pour le moment.</p>
+    <a mat-flat-button color="primary" routerLink="/formations/new">Créer une formation</a>
+  </mat-card-content>
+</mat-card>
+
+<!-- Table -->
+<table mat-table [dataSource]="formations" class="mat-elevation-z2 full-width" *ngIf="!loading && formations.length > 0">
+
+  <ng-container matColumnDef="titre">
+    <th mat-header-cell *matHeaderCellDef>Titre</th>
+    <td mat-cell *matCellDef="let f">
+      <a [routerLink]="['/formations', f.id]" class="link">{{ f.titre }}</a>
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="statut">
+    <th mat-header-cell *matHeaderCellDef>Statut</th>
+    <td mat-cell *matCellDef="let f">
+      <span class="badge" [ngClass]="'badge-' + f.statut">
+        {{ getStatutLabel(f.statut) }}
+      </span>
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="avancement">
+    <th mat-header-cell *matHeaderCellDef>Avancement</th>
+    <td mat-cell *matCellDef="let f" class="progress-cell">
+      <mat-progress-bar mode="determinate" [value]="f.avancement" [color]="getProgressColor(f.avancement)"></mat-progress-bar>
+      <span class="progress-label">{{ f.avancement }}%</span>
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="dateDebut">
+    <th mat-header-cell *matHeaderCellDef>Début</th>
+    <td mat-cell *matCellDef="let f">{{ f.dateDebut | date:'dd/MM/yyyy' }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="dateFin">
+    <th mat-header-cell *matHeaderCellDef>Fin</th>
+    <td mat-cell *matCellDef="let f">{{ f.dateFin | date:'dd/MM/yyyy' }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="actions">
+    <th mat-header-cell *matHeaderCellDef>Actions</th>
+    <td mat-cell *matCellDef="let f">
+      <a mat-icon-button [routerLink]="['/formations', f.id]" matTooltip="Détails">
+        <mat-icon>visibility</mat-icon>
+      </a>
+      <a mat-icon-button [routerLink]="['/formations', f.id, 'edit']" matTooltip="Modifier">
+        <mat-icon>edit</mat-icon>
+      </a>
+      <button mat-icon-button color="warn" (click)="deleteFormation(f)" matTooltip="Supprimer">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+</table>

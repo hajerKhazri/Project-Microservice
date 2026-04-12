@@ -1,0 +1,68 @@
+<div class="dashboard-container">
+  <h1 class="dashboard-title">📊 Tableau de bord d'administration</h1>
+  <p class="dashboard-subtitle">Surveillez les évaluations et l'activité des freelances en temps réel.</p>
+
+  <!-- Cartes de statistiques -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">📝</div>
+      <div class="stat-value">{{ stats.totalReviews }}</div>
+      <div class="stat-label">Évaluations totales</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">👥</div>
+      <div class="stat-value">{{ stats.distinctFreelancers }}</div>
+      <div class="stat-label">Freelances évalués</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">⭐</div>
+      <div class="stat-value">{{ stats.globalAverageScore | number:'1.1-1' }}</div>
+      <div class="stat-label">Score moyen global</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📁</div>
+      <div class="stat-value">{{ stats.distinctProjects }}</div>
+      <div class="stat-label">Projets distincts</div>
+    </div>
+  </div>
+
+  <!-- Top 5 freelances -->
+  <div class="section-card">
+    <h2>🏆 Top 5 des freelances</h2>
+    <div class="top-list">
+      <div *ngFor="let f of topFreelancers; let i = index" class="top-item">
+        <div class="rank">{{ i+1 }}</div>
+        <div class="info">
+          <div class="name">{{ f.freelancerName || 'Freelance #' + f.freelancerId }}</div>
+          <div class="stars">{{ getStars(f.averageScore) }} {{ f.averageScore }} / 5</div>
+        </div>
+        <div class="review-count">{{ f.reviewCount }} avis</div>
+      </div>
+      <div *ngIf="topFreelancers.length === 0" class="empty">Aucune donnée disponible</div>
+    </div>
+  </div>
+
+  <!-- Satisfaction client (barre de progression comme sur la capture) -->
+  <div class="section-card satisfaction-card">
+    <h2>😊 Satisfaction client</h2>
+    <div class="satisfaction-bar-container">
+      <div class="satisfaction-bar positive" [style.width.%]="positivePercent">
+        <span class="label">Positif</span>
+        <span class="percent">{{ positivePercent }}%</span>
+      </div>
+      <div class="satisfaction-bar neutral" [style.width.%]="neutralPercent">
+        <span class="label">Neutre</span>
+        <span class="percent">{{ neutralPercent }}%</span>
+      </div>
+      <div class="satisfaction-bar negative" [style.width.%]="negativePercent">
+        <span class="label">Négatif</span>
+        <span class="percent">{{ negativePercent }}%</span>
+      </div>
+    </div>
+    <div class="satisfaction-legend">
+      <span><span class="dot positive"></span> Positif (4-5⭐)</span>
+      <span><span class="dot neutral"></span> Neutre (3⭐)</span>
+      <span><span class="dot negative"></span> Négatif (1-2⭐)</span>
+    </div>
+  </div>
+</div>

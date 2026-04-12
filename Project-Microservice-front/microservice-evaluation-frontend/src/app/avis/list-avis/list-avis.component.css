@@ -1,0 +1,100 @@
+/* Background global */
+div[style*="background: #f8f9fa"] {
+  background: #0f1f3d !important;
+  color: white;
+}
+
+/* Header */
+h1 {
+  color: white;
+}
+
+p {
+  color: #94a3b8 !important;
+}
+
+/* Card (search + table) */
+div[style*="background: white"] {
+  background: #1e3354 !important;
+  color: white;
+  border-radius: 15px !important;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
+/* Input search */
+input {
+  background: #0f1f3d !important;
+  color: white !important;
+  border: 1px solid #334155 !important;
+}
+
+input::placeholder {
+  color: #94a3b8;
+}
+
+/* Filter buttons */
+button[ng-reflect-ng-for-of] {
+  background: #334155 !important;
+  color: white !important;
+  border: none !important;
+}
+
+button[ng-reflect-ng-for-of]:hover {
+  background: #3b82f6 !important;
+}
+
+/* Add button */
+button[style*="#4361ee"] {
+  background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+}
+
+/* Table */
+table {
+  color: white;
+}
+
+/* Header table */
+thead {
+  background: #263d63;
+}
+
+th {
+  color: #cbd5e1;
+  font-weight: 500;
+}
+
+/* Rows */
+tbody tr {
+  border-bottom: 1px solid #334155;
+}
+
+tbody tr:hover {
+  background: #263d63;
+}
+
+/* Avatar */
+div[style*="border-radius: 50%"] {
+  background: #3b82f6 !important;
+  color: white;
+}
+
+/* Stars */
+td span {
+  color: #facc15 !important;
+}
+
+/* Badge anonymous */
+span[style*="padding: 4px"] {
+  background: #334155 !important;
+  color: white;
+}
+
+/* Action buttons */
+button[style*="background: none"] {
+  color: #cbd5e1;
+  font-size: 16px;
+}
+
+button[style*="background: none"]:hover {
+  color: #3b82f6;
+}

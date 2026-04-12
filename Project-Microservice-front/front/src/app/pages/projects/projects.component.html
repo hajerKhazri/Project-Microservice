@@ -1,0 +1,237 @@
+<main class="projects-page">
+  <section class="container state-row" *ngIf="loading || errorMessage || successMessage">
+    <div class="alert loading" *ngIf="loading">Loading projects through the gateway...</div>
+    <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
+    <div class="alert success" *ngIf="successMessage">{{ successMessage }}</div>
+  </section>
+
+  <section class="container hero-shell dots">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <span class="hero-kicker">Project workspace</span>
+        <h1>Manage projects from the common front</h1>
+        <p>
+          The project microservice is now integrated directly inside the main Angular 17 front.
+          Create, edit, favorite and review project opportunities without leaving the common interface.
+        </p>
+
+        <div class="hero-actions">
+          <button class="btn primary" type="button" (click)="openCreate()">+ New project</button>
+          <button class="btn ghost" type="button" (click)="refreshData()">Refresh</button>
+        </div>
+      </div>
+
+      <div class="metrics-grid">
+        <article class="metric glass-card">
+          <span>Total projects</span>
+          <strong>{{ totalProjects }}</strong>
+        </article>
+        <article class="metric glass-card">
+          <span>Favorites</span>
+          <strong>{{ favoriteProjects }}</strong>
+        </article>
+        <article class="metric glass-card">
+          <span>Average budget</span>
+          <strong>{{ averageBudget }} TND</strong>
+        </article>
+        <article class="metric glass-card">
+          <span>Urgent</span>
+          <strong>{{ urgentProjects }}</strong>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="container toolbar glass-card">
+    <div class="search-wrap">
+      <input
+        class="control"
+        type="search"
+        name="projectSearch"
+        [(ngModel)]="searchTerm"
+        placeholder="Search by title, description or domain...">
+      <span class="counter">{{ filteredProjects.length }} project{{ filteredProjects.length === 1 ? '' : 's' }}</span>
+    </div>
+
+    <div class="filter-row">
+      <select class="control compact" name="projectDomain" [(ngModel)]="selectedDomaine">
+        <option value="">All domains</option>
+        <option *ngFor="let domaine of domaines" [value]="domaine">{{ domainLabel(domaine) }}</option>
+      </select>
+
+      <select class="control compact" name="projectSort" [(ngModel)]="selectedSort">
+        <option value="date-desc">Newest date</option>
+        <option value="date-asc">Closest date</option>
+        <option value="title-asc">Title A-Z</option>
+        <option value="title-desc">Title Z-A</option>
+        <option value="budget-desc">Highest budget</option>
+        <option value="budget-asc">Lowest budget</option>
+      </select>
+
+      <label class="toggle-inline" for="favoritesOnly">
+        <input id="favoritesOnly" type="checkbox" name="favoritesOnly" [(ngModel)]="favoritesOnly">
+        <span>Favorites only</span>
+      </label>
+    </div>
+  </section>
+
+  <section class="container content-grid">
+    <div class="cards-grid">
+      <article class="project-card glass-card" *ngFor="let project of filteredProjects" [class.selected]="selectedProject?.id === project.id">
+        <div class="card-top">
+          <span class="domain-pill">{{ domainLabel(project.domaine) }}</span>
+          <button class="favorite-btn" type="button" (click)="toggleFavorite(project)">
+            {{ project.isFavorite ? 'Saved' : 'Save' }}
+          </button>
+        </div>
+
+        <h2>{{ project.title }}</h2>
+        <p>{{ project.description }}</p>
+
+        <div class="project-meta">
+          <div>
+            <span>Target date</span>
+            <strong>{{ formatDate(project.date) }}</strong>
+          </div>
+          <div>
+            <span>Estimated budget</span>
+            <strong>{{ budgetLabel(project) }}</strong>
+          </div>
+        </div>
+
+        <div class="chip-row">
+          <span class="status-chip" [ngClass]="urgencyClass(project)">{{ urgencyLabel(project) }}</span>
+        </div>
+
+        <div class="card-actions">
+          <button class="btn small ghost" type="button" (click)="selectProject(project)">Details</button>
+          <button class="btn small ghost" type="button" (click)="openEdit(project)">Edit</button>
+          <button class="btn small danger" type="button" (click)="deleteProject(project)" [disabled]="deletingId === project.id">
+            {{ deletingId === project.id ? 'Deleting...' : 'Delete' }}
+          </button>
+        </div>
+      </article>
+
+      <div class="empty glass-card" *ngIf="!filteredProjects.length && !loading">
+        <h2>No projects found</h2>
+        <p>Create a new project or relax the filters.</p>
+        <button class="btn orange" type="button" (click)="openCreate()">+ Add the first project</button>
+      </div>
+    </div>
+
+    <aside class="detail-card glass-card" *ngIf="selectedProject">
+      <span class="detail-kicker">Project focus</span>
+      <h2>{{ selectedProject.title }}</h2>
+      <p>{{ selectedProject.description }}</p>
+
+      <div class="detail-grid">
+        <div class="detail-box">
+          <span>Domain</span>
+          <strong>{{ domainLabel(selectedProject.domaine) }}</strong>
+        </div>
+        <div class="detail-box">
+          <span>Date</span>
+          <strong>{{ formatDate(selectedProject.date) }}</strong>
+        </div>
+        <div class="detail-box">
+          <span>Budget</span>
+          <strong>{{ budgetLabel(selectedProject) }}</strong>
+        </div>
+        <div class="detail-box">
+          <span>Status</span>
+          <strong>{{ urgencyLabel(selectedProject) }}</strong>
+        </div>
+      </div>
+
+      <div class="detail-actions">
+        <button class="btn primary" type="button" (click)="openEdit(selectedProject)">Edit this project</button>
+        <button class="btn ghost" type="button" (click)="toggleFavorite(selectedProject)">
+          {{ selectedProject.isFavorite ? 'Remove favorite' : 'Save project' }}
+        </button>
+      </div>
+    </aside>
+  </section>
+
+  <section class="modal-backdrop" *ngIf="isFormOpen" (click)="closeForm()">
+    <form class="editor glass-card" (ngSubmit)="saveProject(projectForm)" #projectForm="ngForm" (click)="$event.stopPropagation()">
+      <div class="editor-head">
+        <div>
+          <span>{{ isEditMode ? 'Edit project' : 'New project' }}</span>
+          <h2>{{ isEditMode ? formProject.title : 'Create a project' }}</h2>
+        </div>
+        <button class="close-btn" type="button" (click)="closeForm()" aria-label="Close">x</button>
+      </div>
+
+      <div class="editor-body">
+        <div class="form-grid">
+          <div class="field full">
+            <label for="projectTitle">Title</label>
+            <input
+              id="projectTitle"
+              name="projectTitle"
+              type="text"
+              [(ngModel)]="formProject.title"
+              #projectTitleModel="ngModel"
+              [class.invalid-control]="shouldShowError(projectTitleModel)"
+              required
+              minlength="4"
+              pattern="^[A-Z].*"
+              placeholder="Example: Mobile Marketplace">
+            <span class="field-error" *ngIf="hasError(projectTitleModel, 'required')">Title is required.</span>
+            <span class="field-error" *ngIf="hasError(projectTitleModel, 'minlength')">Use at least 4 characters.</span>
+            <span class="field-error" *ngIf="hasError(projectTitleModel, 'pattern')">Title must start with an uppercase letter.</span>
+          </div>
+
+          <div class="field full">
+            <label for="projectDescription">Description</label>
+            <textarea
+              id="projectDescription"
+              name="projectDescription"
+              rows="5"
+              [(ngModel)]="formProject.description"
+              #projectDescriptionModel="ngModel"
+              [class.invalid-control]="shouldShowError(projectDescriptionModel)"
+              required
+              maxlength="1000"
+              placeholder="Describe the project scope and expected outcome."></textarea>
+            <span class="field-error" *ngIf="hasError(projectDescriptionModel, 'required')">Description is required.</span>
+          </div>
+
+          <div class="field">
+            <label for="projectDate">Date</label>
+            <input
+              id="projectDate"
+              name="projectDate"
+              type="date"
+              [(ngModel)]="formProject.date"
+              #projectDateModel="ngModel"
+              [class.invalid-control]="shouldShowError(projectDateModel)"
+              required>
+            <span class="field-error" *ngIf="hasError(projectDateModel, 'required')">Date is required.</span>
+          </div>
+
+          <div class="field">
+            <label for="projectDomainSelect">Domain</label>
+            <select
+              id="projectDomainSelect"
+              name="projectDomainSelect"
+              [(ngModel)]="formProject.domaine"
+              #projectDomainModel="ngModel"
+              [class.invalid-control]="shouldShowError(projectDomainModel)"
+              required>
+              <option *ngFor="let domaine of domaines" [ngValue]="domaine">{{ domainLabel(domaine) }}</option>
+            </select>
+            <span class="field-error" *ngIf="hasError(projectDomainModel, 'required')">Domain is required.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="editor-actions">
+        <button class="btn ghost" type="button" (click)="closeForm()">Cancel</button>
+        <button class="btn primary" type="submit" [disabled]="saving">
+          {{ saving ? 'Saving...' : (isEditMode ? 'Update project' : 'Create project') }}
+        </button>
+      </div>
+    </form>
+  </section>
+</main>

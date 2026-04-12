@@ -1,0 +1,36 @@
+.fichier-section {
+  margin-top: 24px;
+}
+
+.fichier-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.fichier-header h3 {
+  margin: 0;
+  font-weight: 500;
+}
+
+.upload-bar {
+  margin-bottom: 12px;
+}
+
+.empty-files {
+  text-align: center;
+  padding: 24px;
+  color: #9e9e9e;
+}
+
+.empty-files mat-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+}
+
+.fichier-actions {
+  display: flex;
+  gap: 4px;
+}

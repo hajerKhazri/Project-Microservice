@@ -1,0 +1,24 @@
+<header class="navbar">
+  <div class="container nav-inner">
+    <a class="brand" routerLink="/home">
+      <span class="logo"></span>
+      <span>FreeLink</span>
+    </a>
+
+    <nav class="nav-links">
+      <a routerLink="/home" routerLinkActive="active">Home</a>
+      <a href="#offers">Browse Jobs</a>
+      <a href="#applications">Applications</a>
+      <a href="#how">How it works</a>
+      <a href="#contact">Contact</a>
+      <a routerLink="/admin-dashboard" routerLinkActive="active">Dashboard</a>
+      <a routerLink="/projets" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Projets</a>
+
+    </nav>
+
+    <div class="nav-actions">
+
+      <a routerLink="/projets/new" class="btn primary">Publier un projet</a>
+    </div>
+  </div>
+</header>

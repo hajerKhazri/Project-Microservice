@@ -1,0 +1,99 @@
+<main class="platform-page">
+  <section class="container state-row" *ngIf="errorMessage">
+    <div class="alert error">{{ errorMessage }}</div>
+  </section>
+
+  <section class="container hero-shell dots">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <span class="hero-kicker">Integrated microservice portal</span>
+        <h1>Welcome {{ displayNameFor(currentUser) }}</h1>
+        <p>
+          Your sign in now leads to one connected home page where the `user`, `skills`, `project`,
+          `formation` and `evaluation` flows stay chained together around the same FreeLink design.
+        </p>
+
+        <div class="hero-actions">
+          <button class="btn orange" type="button" *ngIf="!isFreelancer" (click)="becomeFreelancer()" [disabled]="promoting">
+            {{ promoting ? 'Updating...' : 'Become Freelancer' }}
+          </button>
+          <a class="btn orange" *ngIf="isFreelancer" routerLink="/skills">Open Skills</a>
+          <a class="btn primary" routerLink="/users">Open User Space</a>
+          <a class="btn ghost" routerLink="/projects">Open Projects</a>
+        </div>
+      </div>
+
+      <article class="hero-summary glass-card">
+        <span class="summary-kicker">Connected scenario</span>
+        <div class="summary-row">
+          <span>Current role</span>
+          <strong>{{ roleLabel(currentUser?.role) }}</strong>
+        </div>
+        <div class="summary-row">
+          <span>Account status</span>
+          <strong>{{ currentUser?.enabled ? 'Enabled' : 'Disabled' }}</strong>
+        </div>
+        <div class="summary-row">
+          <span>Next step</span>
+          <strong>{{ isFreelancer ? 'Manage skills' : 'Become freelancer' }}</strong>
+        </div>
+        <p>
+          Use the navbar to switch between the 6 main entries: Home, Users, Skills, Projects, Formations and Evaluations.
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <section class="container services-block">
+    <div class="section-head">
+      <div>
+        <span class="section-kicker">Available spaces</span>
+        <h2>Choose the microservice you want to open</h2>
+      </div>
+      <a class="btn ghost" routerLink="/users">Manage account</a>
+    </div>
+
+    <div class="services-grid">
+      <article class="service-card glass-card" *ngFor="let card of serviceCards" [ngClass]="card.accent">
+        <span class="service-tag">{{ card.title }}</span>
+        <h3>{{ card.title }}</h3>
+        <p>{{ card.description }}</p>
+
+        <div class="service-meta">
+          <span>Gateway</span>
+          <strong>{{ card.gatewayUrl }}</strong>
+        </div>
+
+        <div class="service-actions">
+          <a class="btn primary" [routerLink]="card.route">{{ card.ctaLabel }}</a>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="container scenario-block">
+    <div class="section-head">
+      <div>
+        <span class="section-kicker">Suggested scenario</span>
+        <h2>Recommended user flow</h2>
+      </div>
+    </div>
+
+    <div class="scenario-grid">
+      <article class="scenario-card glass-card">
+        <strong>1. Sign in or sign up</strong>
+        <p>The application opens on the auth page and keeps the same visual style as the user space.</p>
+      </article>
+
+      <article class="scenario-card glass-card">
+        <strong>2. Land on Home</strong>
+        <p>After sign in, the user arrives on this integrated home page with the navbar and the 6 main entries.</p>
+      </article>
+
+      <article class="scenario-card glass-card">
+        <strong>3. Become Freelancer</strong>
+        <p>Use the highlighted action to switch the role, then continue directly to the skills management page.</p>
+      </article>
+    </div>
+  </section>
+</main>

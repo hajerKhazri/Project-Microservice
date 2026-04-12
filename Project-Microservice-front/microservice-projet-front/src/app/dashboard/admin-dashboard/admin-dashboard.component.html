@@ -1,0 +1,81 @@
+<section class="dashboard-page">
+  <div class="container">
+    <div class="dashboard-head">
+      <div>
+        <h1>Dashboard </h1>
+        <p>Gestion complète des projets</p>
+      </div>
+
+      <a routerLink="/projets/new" class="btn primary-btn">+ Ajouter Projet</a>
+    </div>
+
+    <div *ngIf="loading" class="info-box">Chargement des données...</div>
+    <div *ngIf="errorMessage" class="error-box">{{ errorMessage }}</div>
+
+    <div class="stats-grid" *ngIf="!loading">
+      <div class="stat-card">
+        <span>Total projets</span>
+        <strong>{{ totalProjects }}</strong>
+      </div>
+
+      <div class="stat-card">
+        <span>Projets expirés</span>
+        <strong>{{ expiredProjects }}</strong>
+      </div>
+
+      <div class="stat-card">
+        <span>Favoris</span>
+        <strong>{{ favoriteProjects }}</strong>
+      </div>
+
+      <div class="stat-card">
+        <span>Budget total estimé</span>
+        <strong>{{ totalBudget }} TND</strong>
+      </div>
+    </div>
+
+    <div class="table-card" *ngIf="!loading && projets.length > 0">
+      <div class="table-head">
+        <h2>Liste des projets</h2>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+          <tr>
+            <th>Titre</th>
+            <th>Domaine</th>
+            <th>Date</th>
+            <th>Budget</th>
+            <th>État</th>
+            <th>Actions</th>
+          </tr>
+          </thead>
+
+          <tbody>
+          <tr *ngFor="let projet of projets">
+            <td>{{ projet.title }}</td>
+            <td>{{ projet.domaine }}</td>
+            <td>{{ projet.date }}</td>
+            <td>{{ projet.estimatedBudget }} TND</td>
+            <td>
+                <span [class.expired]="isExpired(projet.date)" [class.active]="!isExpired(projet.date)">
+                  {{ isExpired(projet.date) ? 'Expiré' : 'Actif' }}
+                </span>
+            </td>
+            <td class="actions-cell">
+              <a [routerLink]="['/projets', projet.id]" class="btn small ghost-btn">Détails</a>
+              <a [routerLink]="['/projets/edit', projet.id]" class="btn small primary-btn">Modifier</a>
+              <button class="btn small danger-btn" (click)="deleteProjet(projet.id)">Supprimer</button>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div *ngIf="!loading && projets.length === 0" class="info-box">
+      Aucun projet disponible.
+    </div>
+  </div>
+</section>

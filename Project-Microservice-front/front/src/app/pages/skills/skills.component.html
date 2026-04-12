@@ -1,0 +1,314 @@
+<main class="skills-page" [class.light-mode]="!isDarkMode">
+  <section class="container skills-hero dots">
+    <div class="hero-content">
+      <div class="hero-copy">
+        <a class="brand" routerLink="/">
+          <span class="logo" aria-hidden="true"></span>
+          <span>FreeLink</span>
+        </a>
+
+        <h1>Skills Management</h1>
+        <p>Manage one smart skill entity with automatic certificate status, score and badge.</p>
+
+        <div class="hero-actions">
+          <button class="btn orange" type="button" (click)="openCreate()">+ Add a skill</button>
+          <button class="btn ghost" type="button" (click)="refreshData()">Refresh data</button>
+          <a class="btn ghost" routerLink="/users">Users</a>
+          <button class="btn ghost" type="button" (click)="openScoreboard()">
+            {{ isScoreboardOpen ? 'Hide scoreboard' : 'Scoreboard' }}
+          </button>
+          <button class="btn ghost" type="button" (click)="toggleTheme()">
+            {{ isDarkMode ? 'Light mode' : 'Dark mode' }}
+          </button>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="search-wrap">
+          <input class="control" type="search" [ngModel]="searchTerm" (ngModelChange)="onSearchChange($event)" placeholder="Search (name, badge, certificate, status)...">
+          <span class="counter">{{ totalSkillsLabel }}</span>
+        </div>
+
+        <div class="sort-row">
+          <label for="sortField">Sort</label>
+          <select id="sortField" class="control sort-select" [ngModel]="sortField" (ngModelChange)="onSortFieldChange($event)">
+            <option value="score">Score</option>
+            <option value="id">ID</option>
+            <option value="name">Name</option>
+            <option value="level">Level</option>
+            <option value="yearsOfExperience">Years</option>
+            <option value="badge">Badge</option>
+            <option value="certificateStatus">Certificate</option>
+          </select>
+          <button class="arrow-btn" type="button" (click)="toggleSortDirection()" [attr.aria-label]="'Sort ' + sortDirection">
+            {{ sortDirection === 'asc' ? 'up' : 'down' }}
+          </button>
+        </div>
+
+        <div class="pager-row">
+          <button class="arrow-btn" type="button" (click)="previousPage()" [disabled]="page === 1">left</button>
+          <strong>Page {{ page }} / {{ totalPages }}</strong>
+          <button class="arrow-btn" type="button" (click)="nextPage()" [disabled]="page === totalPages">right</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="container scoreboard-section" *ngIf="isScoreboardOpen">
+    <div class="scoreboard-panel glass-card">
+      <div class="scoreboard-head">
+        <div>
+          <span class="scoreboard-kicker">Skills ranking</span>
+          <h2>Scoreboard</h2>
+          <p>Computed scores from the current filtered skills list.</p>
+        </div>
+
+        <div class="scoreboard-actions">
+          <button
+            class="btn small ghost"
+            type="button"
+            [class.filter-active]="scoreboardDirection === 'desc'"
+            (click)="setScoreboardDirection('desc')">
+            Highest first
+          </button>
+          <button
+            class="btn small ghost"
+            type="button"
+            [class.filter-active]="scoreboardDirection === 'asc'"
+            (click)="setScoreboardDirection('asc')">
+            Lowest first
+          </button>
+        </div>
+      </div>
+
+      <div class="scoreboard-list" *ngIf="scoreboardSkills.length; else emptyScoreboard">
+        <article class="scoreboard-row" *ngFor="let skill of scoreboardSkills; let index = index">
+          <div class="scoreboard-rank">#{{ index + 1 }}</div>
+
+          <div class="scoreboard-main">
+            <div class="scoreboard-title">
+              <span class="medal-icon" [ngClass]="medalClass(skill.badge)" aria-hidden="true">
+                <span class="medal-center"></span>
+              </span>
+              <div>
+                <h3>{{ skill.name }}</h3>
+                <p>{{ badgeLabel(skill.badge) }} - {{ certificateStatusLabel(skill.certificateStatus) }}</p>
+              </div>
+            </div>
+
+            <div class="scoreboard-meta">
+              <span class="score-chip">Score {{ skill.score }}</span>
+              <span class="score-chip">{{ levelLabel(skill.level) }}</span>
+              <span class="score-chip">{{ skill.yearsOfExperience }} years</span>
+            </div>
+
+            <p class="scoreboard-target">{{ skill.nextBadgeTarget }}</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <ng-template #emptyScoreboard>
+    <div class="scoreboard-empty">
+      <h3>No scores to display</h3>
+      <p>Add skills or clear the search filter to populate the ranking.</p>
+    </div>
+  </ng-template>
+
+  <section class="container state-row" *ngIf="loading || errorMessage || successMessage">
+    <div class="alert loading" *ngIf="loading">Loading skills from gateway...</div>
+    <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
+    <div class="alert success" *ngIf="successMessage">{{ successMessage }}</div>
+  </section>
+
+  <section class="container skills-grid" *ngIf="!loading || skills.length">
+    <article class="skill-card glass-card" *ngFor="let skill of pagedSkills; trackBy: trackBySkillId">
+      <div class="card-head">
+        <div>
+          <h2>{{ skill.name }}</h2>
+          <span class="level-badge" [ngClass]="levelBadgeClass(skill.level)">{{ levelLabel(skill.level) }}</span>
+        </div>
+        <div class="rank">#{{ rankFor(skill) }}</div>
+      </div>
+
+      <div class="headline-pills">
+        <span class="skill-badge" [ngClass]="badgeClass(skill.badge)">
+          <span class="medal-icon" [ngClass]="medalClass(skill.badge)" aria-hidden="true">
+            <span class="medal-center"></span>
+          </span>
+          {{ badgeLabel(skill.badge) }}
+        </span>
+        <span class="skill-status" [ngClass]="certificateStatusClass(skill.certificateStatus)">
+          {{ certificateStatusLabel(skill.certificateStatus) }}
+        </span>
+      </div>
+
+      <div class="stats">
+        <div class="stat-box">
+          <span>Score</span>
+          <strong>{{ skill.score }}</strong>
+        </div>
+        <div class="stat-box">
+          <span>Skill ID</span>
+          <strong>{{ skill.id ?? '-' }}</strong>
+        </div>
+        <div class="stat-box">
+          <span>Years</span>
+          <strong>{{ skill.yearsOfExperience }}</strong>
+        </div>
+      </div>
+
+      <p class="description">{{ skill.description || 'No description provided.' }}</p>
+
+      <div class="certificate-card">
+        <div class="certificate-row">
+          <span>Certificate type</span>
+          <strong>{{ certificateTypeLabel(skill.certificateType) }}</strong>
+        </div>
+        <div class="certificate-row">
+          <span>Certificate name</span>
+          <strong>{{ skill.certificateName || 'No certificate' }}</strong>
+        </div>
+        <div class="certificate-row">
+          <span>Expiration</span>
+          <strong>{{ formatDate(skill.certificateExpiresAt) || 'No expiration date' }}</strong>
+        </div>
+      </div>
+
+      <div class="next-target-card">
+        <span>Next target</span>
+        <strong>{{ skill.nextBadgeTarget }}</strong>
+      </div>
+
+      <div class="card-actions">
+        <button class="btn small ghost" type="button" (click)="openEdit(skill)">Edit</button>
+        <button class="btn small ghost" type="button" (click)="printSkill(skill)">PDF</button>
+        <button class="btn small danger" type="button" (click)="deleteSkill(skill)" [disabled]="deletingId === skill.id">
+          {{ deletingId === skill.id ? 'Deleting...' : 'Delete' }}
+        </button>
+      </div>
+    </article>
+
+    <div class="empty glass-card" *ngIf="!pagedSkills.length && !loading">
+      <h2>No skills found</h2>
+      <p>Add the first skill or clear the search filter.</p>
+      <button class="btn orange" type="button" (click)="openCreate()">+ Add a skill</button>
+    </div>
+  </section>
+
+  <section class="modal-backdrop" *ngIf="isFormOpen" (click)="closeForm()">
+    <form class="skill-form glass-card" (ngSubmit)="saveSkill(skillForm)" #skillForm="ngForm" (click)="$event.stopPropagation()">
+      <div class="form-head">
+        <div>
+          <span>{{ isEditMode ? 'Edit skill' : 'New skill' }}</span>
+          <h2>{{ isEditMode ? formSkill.name : 'Add a skill' }}</h2>
+        </div>
+        <button class="close-btn" type="button" (click)="closeForm()" aria-label="Close">x</button>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label for="skillName">Name</label>
+          <input
+            id="skillName"
+            name="name"
+            type="text"
+            [(ngModel)]="formSkill.name"
+            #nameModel="ngModel"
+            [class.invalid-control]="shouldShowError(nameModel)"
+            required
+            maxlength="80"
+            placeholder="Ex: Angular">
+          <span class="field-error" *ngIf="hasError(nameModel, 'required')">Name is required.</span>
+        </div>
+
+        <div class="field">
+          <label for="skillLevel">Level</label>
+          <select
+            id="skillLevel"
+            name="level"
+            [(ngModel)]="formSkill.level"
+            #levelModel="ngModel"
+            [class.invalid-control]="shouldShowError(levelModel)"
+            required>
+            <option *ngFor="let level of levels" [ngValue]="level">{{ levelLabel(level) }}</option>
+          </select>
+          <span class="field-error" *ngIf="hasError(levelModel, 'required')">Level is required.</span>
+        </div>
+
+        <div class="field">
+          <label for="skillYears">Years of experience</label>
+          <input
+            id="skillYears"
+            name="yearsOfExperience"
+            type="number"
+            min="0"
+            [(ngModel)]="formSkill.yearsOfExperience"
+            #yearsModel="ngModel"
+            [class.invalid-control]="shouldShowError(yearsModel)"
+            required>
+          <span class="field-error" *ngIf="hasError(yearsModel, 'required')">Years of experience is required.</span>
+          <span class="field-error" *ngIf="hasError(yearsModel, 'min')">Years must be 0 or more.</span>
+        </div>
+
+        <div class="field">
+          <label for="certificateType">Certificate type</label>
+          <select
+            id="certificateType"
+            name="certificateType"
+            [ngModel]="formSkill.certificateType"
+            #certificateTypeModel="ngModel"
+            [class.invalid-control]="shouldShowError(certificateTypeModel)"
+            (ngModelChange)="onCertificateTypeChange($event)"
+            required>
+            <option *ngFor="let certificateType of certificateTypes" [ngValue]="certificateType">
+              {{ certificateTypeLabel(certificateType) }}
+            </option>
+          </select>
+          <span class="field-error" *ngIf="hasError(certificateTypeModel, 'required')">Certificate type is required.</span>
+        </div>
+      </div>
+
+      <div class="form-grid certificate-grid" *ngIf="formSkill.certificateType !== 'NONE'">
+        <div class="field">
+          <label for="certificateName">Certificate name</label>
+          <input
+            id="certificateName"
+            name="certificateName"
+            type="text"
+            [(ngModel)]="formSkill.certificateName"
+            #certificateNameModel="ngModel"
+            [class.invalid-control]="shouldShowError(certificateNameModel)"
+            required
+            placeholder="Ex: Angular Professional Certificate">
+          <span class="field-error" *ngIf="hasError(certificateNameModel, 'required')">
+            Certificate name is required when a certificate is selected.
+          </span>
+        </div>
+
+        <div class="field">
+          <label for="certificateExpiresAt">Certificate expiration</label>
+          <input
+            id="certificateExpiresAt"
+            name="certificateExpiresAt"
+            type="date"
+            [(ngModel)]="formSkill.certificateExpiresAt"
+            placeholder="YYYY-MM-DD">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="skillDescription">Description</label>
+        <textarea id="skillDescription" name="description" rows="4" [(ngModel)]="formSkill.description" placeholder="Describe this skill..."></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn ghost" type="button" (click)="closeForm()">Cancel</button>
+        <button class="btn primary" type="submit" [disabled]="saving">
+          {{ saving ? 'Saving...' : (isEditMode ? 'Update skill' : 'Create skill') }}
+        </button>
+      </div>
+    </form>
+  </section>
+</main>

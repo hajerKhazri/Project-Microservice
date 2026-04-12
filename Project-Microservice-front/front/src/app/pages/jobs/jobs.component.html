@@ -1,0 +1,79 @@
+<header class="mini-nav">
+  <div class="container nav-row">
+    <a class="brand" routerLink="/">
+      <span class="logo" aria-hidden="true"></span>
+      <span>FreeLink</span>
+    </a>
+    <div class="nav-actions">
+      <a routerLink="/users" class="btn primary">Users</a>
+      <a routerLink="/skills" class="btn primary">Skills</a>
+      <a routerLink="/" class="btn ghost">Home</a>
+    </div>
+  </div>
+</header>
+
+<section class="jobs-hero dots">
+  <div class="container hero-inner">
+    <h1>All Jobs</h1>
+    <p>Find your next opportunity from our listings.</p>
+  </div>
+</section>
+
+<main class="container page-grid">
+  <aside class="filters glass-card">
+    <h2>Filters</h2>
+
+    <div class="filter-block">
+      <div class="filter-title">Category</div>
+      <label><input type="checkbox" checked> Front-end Developer</label>
+      <label><input type="checkbox"> Back-end Developer</label>
+      <label><input type="checkbox"> UI/UX Designer</label>
+      <label><input type="checkbox"> Mobile Developer</label>
+    </div>
+
+    <div class="filter-block">
+      <div class="filter-title">Type</div>
+      <div class="pill-row">
+        <button class="pill active" type="button">Remote</button>
+        <button class="pill" type="button">Hybrid</button>
+        <button class="pill" type="button">On-site</button>
+      </div>
+    </div>
+  </aside>
+
+  <section class="list">
+    <div class="list-head">
+      <div class="result">
+        <strong>{{ filteredJobs.length }}</strong> jobs found
+      </div>
+      <input class="control search" type="text" [(ngModel)]="searchTerm" placeholder="Search jobs (Angular, Spring, UI/UX...)">
+    </div>
+
+    <article class="job glass-card" *ngFor="let job of filteredJobs">
+      <div class="job-main">
+        <div class="job-top">
+          <h3>{{ job.title }}</h3>
+          <span class="type" [class.remote]="job.type === 'Remote'" [class.hybrid]="job.type === 'Hybrid'" [class.onsite]="job.type === 'On-site'">
+            {{ job.type }}
+          </span>
+        </div>
+
+        <div class="meta">
+          <span><strong>Client:</strong> FreeLink</span>
+          <span><strong>Budget:</strong> {{ job.budget }}</span>
+        </div>
+
+        <div class="chips">
+          <span class="chip" *ngFor="let tag of job.tags">{{ tag }}</span>
+        </div>
+
+        <p>{{ job.description }}</p>
+      </div>
+
+      <div class="job-actions">
+        <a href="#apply" class="btn small primary">Apply</a>
+        <a routerLink="/" class="btn small ghost">Details</a>
+      </div>
+    </article>
+  </section>
+</main>

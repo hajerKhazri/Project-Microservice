@@ -1,0 +1,45 @@
+<section class="detail-page">
+  <div class="detail-card" *ngIf="projet">
+    <div class="head">
+      <h1>Détail du Projet</h1>
+      <p>Consultez toutes les informations de ce projet</p>
+    </div>
+
+    <div class="detail-content">
+      <div class="field-view">
+        <span class="label">Titre</span>
+        <p>{{ projet.title }}</p>
+      </div>
+
+      <div class="field-view">
+        <span class="label">Description</span>
+        <p>{{ projet.description }}</p>
+      </div>
+
+      <div class="two-view">
+        <div class="field-view">
+          <span class="label">Date</span>
+          <p>{{ projet.date }}</p>
+        </div>
+
+        <div class="field-view">
+          <span class="label">Domaine</span>
+          <p>{{ projet.domaine }}</p>
+        </div>
+      </div>
+
+      <div class="field-view budget-box">
+        <span class="label">Budget estimé</span>
+        <p>{{ projet.estimatedBudget }} TND</p>
+      </div>
+    </div>
+
+    <div class="actions">
+      <a routerLink="/projets" class="btn ghost-btn">Retour</a>
+
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="info-box">Chargement...</div>
+  <div *ngIf="errorMessage" class="form-error-summary">{{ errorMessage }}</div>
+</section>

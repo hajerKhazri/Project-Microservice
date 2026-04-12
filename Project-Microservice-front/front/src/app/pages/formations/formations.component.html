@@ -1,0 +1,250 @@
+<main class="formations-page">
+  <section class="container state-row" *ngIf="loading || errorMessage || successMessage">
+    <div class="alert loading" *ngIf="loading">Loading formations through the gateway...</div>
+    <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
+    <div class="alert success" *ngIf="successMessage">{{ successMessage }}</div>
+  </section>
+
+  <section class="container hero-shell dots">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <span class="hero-kicker">Formation workspace</span>
+        <h1>Run the formation microservice inside the common front</h1>
+        <p>
+          Browse training sessions, update their progress and manage uploaded files from the same portal.
+          The page keeps the common FreeLink design while using the gateway routes of the formation service.
+        </p>
+
+        <div class="hero-actions">
+          <button class="btn primary" type="button" (click)="openCreate()">+ New formation</button>
+          <button class="btn ghost" type="button" (click)="refreshData()">Refresh</button>
+        </div>
+      </div>
+
+      <div class="metrics-grid">
+        <article class="metric glass-card">
+          <span>Total formations</span>
+          <strong>{{ stats?.totalFormations ?? 0 }}</strong>
+        </article>
+        <article class="metric glass-card">
+          <span>Average progress</span>
+          <strong>{{ stats ? (stats.progressionGlobale | number:'1.0-0') : 0 }}%</strong>
+        </article>
+        <article class="metric glass-card">
+          <span>In progress</span>
+          <strong>{{ stats?.formationsEnCours ?? 0 }}</strong>
+        </article>
+        <article class="metric glass-card">
+          <span>Completed</span>
+          <strong>{{ stats?.formationsTerminees ?? 0 }}</strong>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="container toolbar glass-card">
+    <div class="search-wrap">
+      <input
+        class="control"
+        type="search"
+        name="formationSearch"
+        [(ngModel)]="searchTerm"
+        placeholder="Search by title or description...">
+      <span class="counter">{{ filteredFormations.length }} formation{{ filteredFormations.length === 1 ? '' : 's' }}</span>
+    </div>
+
+    <div class="filter-row">
+      <select class="control compact" name="formationStatus" [(ngModel)]="selectedStatus">
+        <option value="">All statuses</option>
+        <option *ngFor="let status of statuses" [value]="status">{{ statusLabel(status) }}</option>
+      </select>
+    </div>
+  </section>
+
+  <section class="container content-grid">
+    <div class="cards-grid">
+      <article class="formation-card glass-card" *ngFor="let formation of filteredFormations" [class.selected]="selectedFormation?.id === formation.id">
+        <div class="card-top">
+          <span class="status-pill" [ngClass]="statusClass(formation.statut)">{{ statusLabel(formation.statut) }}</span>
+          <span class="progress-chip">{{ formation.avancement }}%</span>
+        </div>
+
+        <h2>{{ formation.titre }}</h2>
+        <p>{{ formation.description || 'No description provided.' }}</p>
+
+        <div class="progress-wrap">
+          <div class="progress-track">
+            <div class="progress-fill" [style.width]="progressStyle(formation)"></div>
+          </div>
+          <strong>{{ formation.avancement }}%</strong>
+        </div>
+
+        <div class="formation-meta">
+          <div>
+            <span>Start date</span>
+            <strong>{{ formatDate(formation.dateDebut) }}</strong>
+          </div>
+          <div>
+            <span>End date</span>
+            <strong>{{ formatDate(formation.dateFin) }}</strong>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button class="btn small ghost" type="button" (click)="selectFormation(formation)">Details</button>
+          <button class="btn small ghost" type="button" (click)="openEdit(formation)">Edit</button>
+          <button class="btn small danger" type="button" (click)="deleteFormation(formation)" [disabled]="deletingId === formation.id">
+            {{ deletingId === formation.id ? 'Deleting...' : 'Delete' }}
+          </button>
+        </div>
+      </article>
+
+      <div class="empty glass-card" *ngIf="!filteredFormations.length && !loading">
+        <h2>No formations found</h2>
+        <p>Add the first training session from the common front.</p>
+        <button class="btn orange" type="button" (click)="openCreate()">+ Add formation</button>
+      </div>
+    </div>
+
+    <aside class="detail-card glass-card" *ngIf="selectedFormation">
+      <span class="detail-kicker">Formation focus</span>
+      <h2>{{ selectedFormation.titre }}</h2>
+      <p>{{ selectedFormation.description || 'No description provided.' }}</p>
+
+      <div class="detail-grid">
+        <div class="detail-box">
+          <span>Status</span>
+          <strong>{{ statusLabel(selectedFormation.statut) }}</strong>
+        </div>
+        <div class="detail-box">
+          <span>Progress</span>
+          <strong>{{ selectedFormation.avancement }}%</strong>
+        </div>
+        <div class="detail-box">
+          <span>Start</span>
+          <strong>{{ formatDate(selectedFormation.dateDebut) }}</strong>
+        </div>
+        <div class="detail-box">
+          <span>End</span>
+          <strong>{{ formatDate(selectedFormation.dateFin) }}</strong>
+        </div>
+      </div>
+
+      <div class="upload-card">
+        <strong>Attached files</strong>
+
+        <div class="upload-controls">
+          <label class="btn small ghost file-picker" for="formationFilePicker">
+            <span>{{ selectedUploadFile?.name || 'Choose a file' }}</span>
+          </label>
+          <input id="formationFilePicker" class="file-input" type="file" (change)="onFileSelected($event)" #fileInput>
+          <button class="btn small primary" type="button" (click)="uploadFile(fileInput)" [disabled]="uploading || !selectedUploadFile">
+            {{ uploading ? 'Uploading...' : 'Upload file' }}
+          </button>
+        </div>
+        <small class="upload-hint">{{ selectedUploadFile ? ('Selected: ' + selectedUploadFile.name) : 'No file selected yet.' }}</small>
+
+        <div class="file-list" *ngIf="selectedFormationFiles.length; else emptyFiles">
+          <article class="file-item" *ngFor="let file of selectedFormationFiles">
+            <div>
+              <strong>{{ file.nomFichier }}</strong>
+              <span>{{ fileSizeLabel(file.tailleFichier) }} · {{ formatDate(file.dateUpload) }}</span>
+            </div>
+
+            <div class="file-actions">
+              <button class="btn small ghost" type="button" (click)="downloadFile(file)">Download</button>
+              <button class="btn small danger" type="button" (click)="deleteFile(file)" [disabled]="deletingFileId === file.id">
+                {{ deletingFileId === file.id ? 'Deleting...' : 'Delete' }}
+              </button>
+            </div>
+          </article>
+        </div>
+
+        <ng-template #emptyFiles>
+          <p class="file-empty">No files uploaded for this formation yet.</p>
+        </ng-template>
+      </div>
+    </aside>
+  </section>
+
+  <section class="modal-backdrop" *ngIf="isFormOpen" (click)="closeForm()">
+    <form class="editor glass-card" (ngSubmit)="saveFormation(formationForm)" #formationForm="ngForm" (click)="$event.stopPropagation()">
+      <div class="editor-head">
+        <div>
+          <span>{{ isEditMode ? 'Edit formation' : 'New formation' }}</span>
+          <h2>{{ isEditMode ? formFormation.titre : 'Create a formation' }}</h2>
+        </div>
+        <button class="close-btn" type="button" (click)="closeForm()" aria-label="Close">x</button>
+      </div>
+
+      <div class="editor-body">
+        <div class="form-grid">
+          <div class="field full">
+            <label for="formationTitle">Title</label>
+            <input
+              id="formationTitle"
+              name="formationTitle"
+              type="text"
+              [(ngModel)]="formFormation.titre"
+              #formationTitleModel="ngModel"
+              [class.invalid-control]="shouldShowError(formationTitleModel)"
+              required
+              maxlength="180"
+              placeholder="Example: Spring Microservices Bootcamp">
+            <span class="field-error" *ngIf="hasError(formationTitleModel, 'required')">Title is required.</span>
+          </div>
+
+          <div class="field full">
+            <label for="formationDescription">Description</label>
+            <textarea
+              id="formationDescription"
+              name="formationDescription"
+              rows="5"
+              [(ngModel)]="formFormation.description"
+              maxlength="4000"
+              placeholder="Describe the content and target learners."></textarea>
+          </div>
+
+          <div class="field">
+            <label for="formationStart">Start date</label>
+            <input id="formationStart" name="formationStart" type="date" [(ngModel)]="formFormation.dateDebut">
+          </div>
+
+          <div class="field">
+            <label for="formationEnd">End date</label>
+            <input id="formationEnd" name="formationEnd" type="date" [(ngModel)]="formFormation.dateFin">
+          </div>
+
+          <div class="field">
+            <label for="formationStatusSelect">Status</label>
+            <select id="formationStatusSelect" name="formationStatusSelect" [(ngModel)]="formFormation.statut" required>
+              <option *ngFor="let status of statuses" [ngValue]="status">{{ statusLabel(status) }}</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="formationProgress">Progress (%)</label>
+            <input
+              id="formationProgress"
+              name="formationProgress"
+              type="number"
+              [(ngModel)]="formFormation.avancement"
+              #formationProgressModel="ngModel"
+              [class.invalid-control]="shouldShowError(formationProgressModel)"
+              min="0"
+              max="100"
+              required>
+            <span class="field-error" *ngIf="hasError(formationProgressModel, 'required')">Progress is required.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="editor-actions">
+        <button class="btn ghost" type="button" (click)="closeForm()">Cancel</button>
+        <button class="btn primary" type="submit" [disabled]="saving">
+          {{ saving ? 'Saving...' : (isEditMode ? 'Update formation' : 'Create formation') }}
+        </button>
+      </div>
+    </form>
+  </section>
+</main>
