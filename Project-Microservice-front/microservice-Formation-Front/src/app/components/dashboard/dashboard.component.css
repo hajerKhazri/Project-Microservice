@@ -1,0 +1,129 @@
+h1 {
+  font-size: 1.8rem;
+  font-weight: 500;
+  margin-bottom: 24px;
+}
+
+.dashboard-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* KPI Row */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.kpi-card mat-card-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px !important;
+}
+
+.kpi-icon {
+  font-size: 40px;
+  width: 40px;
+  height: 40px;
+}
+
+.kpi-icon.blue { color: #1976d2; }
+.kpi-icon.orange { color: #ff9800; }
+.kpi-icon.green { color: #4caf50; }
+.kpi-icon.purple { color: #9c27b0; }
+
+.kpi-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.kpi-value {
+  font-size: 1.8rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.kpi-label {
+  font-size: 0.85rem;
+  color: #757575;
+  margin-top: 4px;
+}
+
+/* Progress Row */
+.progress-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.progress-card h3 {
+  margin: 0 0 16px 0;
+  font-weight: 500;
+}
+
+.progress-display {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.progress-display mat-progress-bar {
+  flex: 1;
+}
+
+.progress-value {
+  font-size: 1.4rem;
+  font-weight: 600;
+  min-width: 60px;
+  text-align: right;
+}
+
+/* Charts Row */
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.chart-card h3 {
+  margin: 0 0 16px 0;
+  font-weight: 500;
+}
+
+.chart-wrapper {
+  max-height: 300px;
+  display: flex;
+  justify-content: center;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px;
+  gap: 16px;
+  color: #757575;
+}
+
+.error-state {
+  text-align: center;
+  padding: 48px;
+}
+
+.error-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  color: #f44336;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 768px) {
+  .progress-row, .charts-row {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,123 @@
+<h1>Dashboard</h1>
+
+<!-- Loading -->
+<div *ngIf="loading" class="loading-container">
+  <mat-spinner diameter="48"></mat-spinner>
+  <p>Chargement des statistiques...</p>
+</div>
+
+<!-- Error -->
+<mat-card *ngIf="!loading && error" class="error-state">
+  <mat-card-content>
+    <mat-icon class="error-icon">error_outline</mat-icon>
+    <p>Impossible de charger les statistiques.</p>
+    <button mat-flat-button color="primary" (click)="loadStats()">
+      <mat-icon>refresh</mat-icon> Réessayer
+    </button>
+  </mat-card-content>
+</mat-card>
+
+<!-- Stats -->
+<div *ngIf="!loading && stats" class="dashboard-grid">
+
+  <!-- KPI Cards -->
+  <div class="kpi-row">
+    <mat-card class="kpi-card">
+      <mat-card-content>
+        <mat-icon class="kpi-icon blue">school</mat-icon>
+        <div class="kpi-info">
+          <span class="kpi-value">{{ stats.totalFormations }}</span>
+          <span class="kpi-label">Total formations</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="kpi-card">
+      <mat-card-content>
+        <mat-icon class="kpi-icon orange">pending</mat-icon>
+        <div class="kpi-info">
+          <span class="kpi-value">{{ stats.formationsEnCours }}</span>
+          <span class="kpi-label">En cours</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="kpi-card">
+      <mat-card-content>
+        <mat-icon class="kpi-icon green">check_circle</mat-icon>
+        <div class="kpi-info">
+          <span class="kpi-value">{{ stats.formationsTerminees }}</span>
+          <span class="kpi-label">Terminées</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="kpi-card">
+      <mat-card-content>
+        <mat-icon class="kpi-icon purple">schedule</mat-icon>
+        <div class="kpi-info">
+          <span class="kpi-value">{{ stats.dureeMoyenneJours }} j</span>
+          <span class="kpi-label">Durée moyenne</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Progress Cards -->
+  <div class="progress-row">
+    <mat-card class="progress-card">
+      <mat-card-content>
+        <h3>Avancement moyen</h3>
+        <div class="progress-display">
+          <mat-progress-bar mode="determinate"
+            [value]="stats.tauxMoyenAvancement"
+            [color]="getProgressColor()">
+          </mat-progress-bar>
+          <span class="progress-value">{{ stats.tauxMoyenAvancement }}%</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="progress-card">
+      <mat-card-content>
+        <h3>Progression globale</h3>
+        <div class="progress-display">
+          <mat-progress-bar mode="determinate"
+            [value]="stats.progressionGlobale"
+            color="primary">
+          </mat-progress-bar>
+          <span class="progress-value">{{ stats.progressionGlobale }}%</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Charts -->
+  <div class="charts-row">
+    <mat-card class="chart-card">
+      <mat-card-content>
+        <h3>Répartition par statut</h3>
+        <div class="chart-wrapper">
+          <canvas baseChart
+            type="doughnut"
+            [data]="statutChartData"
+            [options]="statutChartOptions">
+          </canvas>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="chart-card">
+      <mat-card-content>
+        <h3>Formations par statut</h3>
+        <div class="chart-wrapper">
+          <canvas baseChart
+            type="bar"
+            [data]="barChartData"
+            [options]="barChartOptions">
+          </canvas>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

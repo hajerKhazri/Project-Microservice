@@ -1,0 +1,70 @@
+<div class="review-container">
+
+  <div class="review-card">
+
+    <div class="review-header">
+      <h2>Edit Review</h2>
+      <p>Update your feedback about the freelancer</p>
+    </div>
+
+    <form (ngSubmit)="updateAvis()" class="review-form">
+
+      <div>
+        <label>Project Name *</label>
+        <input type="text" [(ngModel)]="avis.projectName" name="projectName">
+      </div>
+
+      <div>
+        <label>Freelancer Name *</label>
+        <input type="text" [(ngModel)]="avis.freelancerName" name="freelancerName">
+      </div>
+
+      <div>
+        <label>Evaluator Email *</label>
+        <input type="email" [(ngModel)]="avis.clientName" name="clientName">
+      </div>
+
+      <div>
+        <label>Evaluator Name *</label>
+        <input type="text" [(ngModel)]="avis.evaluatorName" name="evaluatorName">
+      </div>
+
+      <div>
+        <label>Score *</label>
+        <div class="stars">
+          <span *ngFor="let star of [1,2,3,4,5]"
+                (click)="setNote(star)"
+                [style.color]="star <= avis.score ? '#f97316' : '#475569'">
+            ★
+          </span>
+          <span class="score-text">{{ avis.score }}/5</span>
+        </div>
+      </div>
+
+      <div>
+        <label>Comment *</label>
+        <textarea [(ngModel)]="avis.comment" name="comment" rows="4"></textarea>
+        <div class="char-count">
+          {{ (avis.comment ? avis.comment.length : 0) }}/1000
+        </div>
+      </div>
+
+      <div class="checkbox">
+        <input type="checkbox" [(ngModel)]="avis.isAnonymous" name="isAnonymous">
+        <label>Post anonymously</label>
+      </div>
+
+      <div class="buttons">
+        <button type="button" routerLink="/avis" class="btn-cancel">
+          Cancel
+        </button>
+
+        <button type="submit" class="btn-submit">
+          Update Review
+        </button>
+      </div>
+
+    </form>
+
+  </div>
+</div>

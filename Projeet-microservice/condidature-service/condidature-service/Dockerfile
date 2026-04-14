@@ -1,0 +1,14 @@
+# 1. Image Java (JDK)
+FROM amazoncorretto:17
+
+# 2. Dossier de travail
+WORKDIR /app
+
+# 3. Copier le jar
+COPY target/*.jar app.jar
+
+# 4. Exposer le port du microservice
+EXPOSE 8081
+
+# 5. Lancer l'application
+ENTRYPOINT ["java", "-jar", "app.jar"]

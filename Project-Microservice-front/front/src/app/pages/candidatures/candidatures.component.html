@@ -1,0 +1,215 @@
+<div class="candidatures-page container">
+
+  <!-- Hero -->
+  <section class="hero-shell glass-card">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <span class="hero-kicker">{{ isFreelancer ? 'Freelancer Dashboard' : (isClient ? 'Manager Dashboard' : 'Admin
+          Hub') }}</span>
+        <h1>{{ isFreelancer ? 'My Applications' : 'Request Management' }}</h1>
+        <p *ngIf="isFreelancer">Track your submissions, monitor status updates, and manage your active project interest.
+        </p>
+        <p *ngIf="!isFreelancer">Review incoming applications, optimize your project teams, and respond to freelancer
+          interest in real-time.</p>
+        <div class="hero-actions">
+          <button class="btn primary" *ngIf="isFreelancer || isAdmin" (click)="openCreate()">+ New Application</button>
+          <button class="btn ghost" (click)="refreshData()">↺ Refresh</button>
+        </div>
+      </div>
+      <div class="metrics-grid">
+        <div class="metric glass-card">
+          <span>Total</span>
+          <strong>{{ totalCandidatures }}</strong>
+        </div>
+        <div class="metric glass-card">
+          <span>Pending</span>
+          <strong class="pending-text">{{ pendingCount }}</strong>
+        </div>
+        <div class="metric glass-card">
+          <span>Accepted</span>
+          <strong class="accepted-text">{{ acceptedCount }}</strong>
+        </div>
+        <div class="metric glass-card">
+          <span>Rejected</span>
+          <strong class="rejected-text">{{ rejectedCount }}</strong>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Alerts -->
+  <div *ngIf="loading" class="alert loading">⏳ Loading candidatures...</div>
+  <div *ngIf="errorMessage" class="alert error">⚠ {{ errorMessage }}</div>
+  <div *ngIf="successMessage" class="alert success">✓ {{ successMessage }}</div>
+
+  <!-- Toolbar -->
+  <div class="toolbar glass-card">
+    <div class="search-wrap">
+      <input class="control" type="search" placeholder="Search by name or email..." [(ngModel)]="searchTerm"
+        id="candidature-search" />
+      <span class="counter">{{ filteredCandidatures.length }} result(s)</span>
+    </div>
+    <div class="filter-row">
+      <select class="control compact" [(ngModel)]="statusFilter" id="status-filter">
+        <option value="">All Statuses</option>
+        <option *ngFor="let s of allStatuses" [value]="s">{{ statusLabel(s) }}</option>
+      </select>
+      <select class="control compact" [(ngModel)]="selectedSort" id="sort-select">
+        <option value="name-asc">Name A→Z</option>
+        <option value="name-desc">Name Z→A</option>
+        <option value="status">Status</option>
+        <option value="project">Project</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content-grid" *ngIf="!loading">
+    <!-- List -->
+    <div class="cards-grid">
+      <div *ngFor="let c of filteredCandidatures; trackBy: trackById" class="cand-card glass-card"
+        [class.selected]="selectedCandidature?.id === c.id" (click)="selectCandidature(c)">
+        <div class="card-top">
+          <div class="card-identity">
+            <div class="avatar">{{ c.candidateName.charAt(0).toUpperCase() }}</div>
+            <div>
+              <h2>{{ c.candidateName }}</h2>
+              <span class="email-tag">{{ c.email }}</span>
+            </div>
+          </div>
+          <span class="status-pill" [ngClass]="statusClass(c.status)">{{ statusLabel(c.status) }}</span>
+        </div>
+
+        <p class="project-label">Project: <strong>{{ projectTitle(c.projectId) }}</strong></p>
+
+        <div class="card-actions">
+          <!-- Client/Admin Management Actions -->
+          <div class="status-actions" *ngIf="isClient || isAdmin">
+            <button class="btn-xs accepted-btn" [disabled]="c.status === 'ACCEPTED' || updatingStatusId === c.id"
+              (click)="$event.stopPropagation(); acceptApp(c)">Accept</button>
+            <button class="btn-xs rejected-btn" [disabled]="c.status === 'REJECTED' || updatingStatusId === c.id"
+              (click)="$event.stopPropagation(); rejectApp(c)">Reject</button>
+          </div>
+
+          <!-- Freelancer Actions -->
+          <div class="freelancer-actions" *ngIf="isFreelancer">
+            <button class="btn-xs withdraw-btn" *ngIf="c.status === 'PENDING'" [disabled]="deletingId === c.id"
+              (click)="$event.stopPropagation(); withdrawApp(c)">Withdraw</button>
+          </div>
+
+          <!-- Admin-only System Actions -->
+          <div class="edit-actions" *ngIf="isAdmin">
+            <button class="btn-xs edit-btn" (click)="$event.stopPropagation(); openEdit(c)">Edit</button>
+            <button class="btn-xs delete-btn" [disabled]="deletingId === c.id"
+              (click)="$event.stopPropagation(); deleteCandidature(c)">{{ deletingId === c.id ? '…' : 'Delete'
+              }}</button>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="filteredCandidatures.length === 0 && !loading" class="empty glass-card">
+        <h2>No Applications Found</h2>
+        <p>No candidatures match your current filters. Try adjusting your search or submit a new application.</p>
+        <button class="btn primary" (click)="openCreate()">+ Submit First Application</button>
+      </div>
+    </div>
+
+    <!-- Detail Panel -->
+    <div class="side-column" *ngIf="selectedCandidature as c">
+      <div class="detail-card glass-card">
+        <div class="detail-header">
+          <div class="detail-avatar">{{ c.candidateName.charAt(0).toUpperCase() }}</div>
+          <div>
+            <span class="detail-kicker">Application Detail</span>
+            <h2>{{ c.candidateName }}</h2>
+          </div>
+        </div>
+
+        <span class="status-pill large" [ngClass]="statusClass(c.status)">{{ statusLabel(c.status) }}</span>
+
+        <div class="detail-row">
+          <span>Email</span>
+          <strong>{{ c.email }}</strong>
+        </div>
+        <div class="detail-row">
+          <span>Project</span>
+          <strong>{{ projectTitle(c.projectId) }}</strong>
+        </div>
+        <div class="detail-row">
+          <span>Application ID</span>
+          <strong>#{{ c.id }}</strong>
+        </div>
+
+        <div class="detail-actions" *ngIf="isClient || isAdmin">
+          <button class="btn primary" [disabled]="c.status === 'ACCEPTED' || updatingStatusId === c.id"
+            (click)="acceptApp(c)">✓ Accept</button>
+          <button class="btn danger" [disabled]="c.status === 'REJECTED' || updatingStatusId === c.id"
+            (click)="rejectApp(c)">✗ Reject</button>
+        </div>
+
+        <div class="detail-actions" *ngIf="isFreelancer && c.status === 'PENDING'">
+          <button class="btn danger" [disabled]="deletingId === c.id" (click)="withdrawApp(c)">Withdraw
+            Application</button>
+        </div>
+
+        <button class="btn ghost" *ngIf="isAdmin" (click)="openEdit(c)">Edit Application</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Form -->
+  <div class="modal-backdrop" *ngIf="isFormOpen" (click)="closeForm()">
+    <div class="editor glass-card" (click)="$event.stopPropagation()">
+      <div class="editor-head">
+        <div>
+          <span>{{ isEditMode ? 'Edit Application' : 'New Application' }}</span>
+          <h2>{{ isEditMode ? 'Update Details' : 'Submit Application' }}</h2>
+        </div>
+        <button class="close-btn" type="button" (click)="closeForm()">✕</button>
+      </div>
+
+      <form #candidatureForm="ngForm" (ngSubmit)="saveCandidature(candidatureForm)" novalidate>
+        <div class="form-grid">
+          <div class="field">
+            <label for="f-name">Full Name *</label>
+            <input class="control" id="f-name" name="candidateName" [(ngModel)]="formCandidature.candidateName" required
+              minlength="2" #nameModel="ngModel" [class.invalid-control]="shouldShowError(nameModel)"
+              placeholder="Your full name" />
+            <span class="field-error" *ngIf="hasError(nameModel, 'required')">Name is required.</span>
+            <span class="field-error" *ngIf="hasError(nameModel, 'minlength')">Name must be at least 2
+              characters.</span>
+          </div>
+
+          <div class="field">
+            <label for="f-email">Email *</label>
+            <input class="control" id="f-email" name="email" type="email" [(ngModel)]="formCandidature.email" required
+              email #emailModel="ngModel" [class.invalid-control]="shouldShowError(emailModel)"
+              placeholder="contact@example.com" />
+            <span class="field-error" *ngIf="hasError(emailModel, 'required')">Email is required.</span>
+            <span class="field-error" *ngIf="hasError(emailModel, 'email')">Enter a valid email address.</span>
+          </div>
+
+          <div class="field full">
+            <label for="f-project">Project *</label>
+            <select class="control" id="f-project" name="projectId" [(ngModel)]="formCandidature.projectId" required
+              #projectModel="ngModel" [class.invalid-control]="shouldShowError(projectModel)">
+              <option [ngValue]="null" disabled>Select a project…</option>
+              <option *ngFor="let p of projects" [ngValue]="p.id">
+                {{ p.title }} — {{ p.domaine }}
+              </option>
+            </select>
+            <span class="field-error" *ngIf="shouldShowError(projectModel)">Please select a project.</span>
+          </div>
+        </div>
+
+        <div class="editor-actions">
+          <button class="btn ghost" type="button" (click)="closeForm()">Cancel</button>
+          <button class="btn primary" type="submit" [disabled]="saving">
+            {{ saving ? 'Saving…' : (isEditMode ? 'Update' : 'Submit Application') }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>

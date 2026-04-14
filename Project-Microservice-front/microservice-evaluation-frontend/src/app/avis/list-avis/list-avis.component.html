@@ -1,0 +1,46 @@
+<div style="padding: 24px; background: #f8f9fa; min-height: 100vh;">
+  <div style="display: flex; justify-content: space-between; margin-bottom: 24px;">
+    <div>
+      <h1 style="font-size: 28px;">list of reviews</h1>
+      <p style="color: #6c757d;">Browse, filter and manage all reviews.</p>
+    </div>
+    <button (click)="addAvis()" style="background: #4361ee; color: white; border: none; padding: 10px 20px; border-radius: 8px;">
+      + Add Review
+    </button>
+  </div>
+
+  <div style="background: white; padding: 20px; border-radius: 12px; margin-bottom: 24px;">
+    <input type="text" placeholder="Search by evaluator name..." [(ngModel)]="searchTerm" (input)="onSearchChange()"
+           style="width: 100%; padding: 12px; border: 1px solid #dee2e6; border-radius: 8px; margin-bottom: 16px;">
+    <div style="display: flex; gap: 8px;">
+      <button *ngFor="let score of scores" (click)="onScoreChange(score)"
+              [style.background]="selectedScore === score ? '#4361ee' : '#f3f4f6'"
+              [style.color]="selectedScore === score ? 'white' : 'black'"
+              style="padding: 6px 14px; border-radius: 20px; border: 1px solid #dee2e6; cursor: pointer;">
+        {{ score }}
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="loading" style="text-align: center; padding: 48px;">Chargement...</div>
+
+  <div *ngIf="!loading" style="background: white; border-radius: 12px; overflow-x: auto;">
+    <table style="width: 100%; border-collapse: collapse;">
+      <thead>
+        <tr><th style="padding: 16px;">Project</th><th>Evaluator</th><th>Evaluated User</th><th>Score</th><th>Comment</th><th>Anonymous</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let avis of filteredAvis">
+          <td style="padding: 16px;">{{ avis.projectName || 'projetA' }}</td>
+          <td><div style="display: flex; align-items: center; gap: 8px;"><div style="width: 32px; height: 32px; background: #e5e7eb; border-radius: 50%; display: flex; align-items: center; justify-content: center;">{{ (avis.evaluatorName || avis.clientName).charAt(0).toUpperCase() }}</div> {{ avis.evaluatorName || avis.clientName }}</div></td>
+          <td>{{ avis.freelancerName || 'freelancer@example.com' }}</td>
+          <td><div style="display: flex; gap: 4px;">{{ getStars(avis.score).join('') }} <span style="color: #f59e0b;">{{ avis.score }}</span></div></td>
+          <td>{{ avis.comment }}</td>
+          <td><span [style.background]="avis.isAnonymous ? '#d1fae5' : '#f3f4f6'" style="padding: 4px 8px; border-radius: 4px;">{{ avis.isAnonymous ? 'Yes' : 'No' }}</span></td>
+          <td><button (click)="editAvis(avis.id)" style="background: none; border: none; cursor: pointer; margin-right: 8px;">✏️</button><button (click)="deleteAvis(avis.id)" style="background: none; border: none; cursor: pointer;">🗑️</button></td>
+        </tr>
+        <tr *ngIf="filteredAvis.length === 0"><td colspan="7" style="text-align: center; padding: 48px;">Aucun avis</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>

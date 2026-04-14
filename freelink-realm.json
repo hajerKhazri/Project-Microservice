@@ -1,0 +1,34 @@
+{
+    "id": "freelink",
+    "realm": "freelink",
+    "enabled": true,
+    "clients": [
+        {
+            "clientId": "freelink-web",
+            "enabled": true,
+            "publicClient": true,
+            "directAccessGrantsEnabled": true,
+            "redirectUris": [
+                "http://localhost:4200/*"
+            ],
+            "webOrigins": [
+                "http://localhost:4200"
+            ],
+            "standardFlowEnabled": true
+        }
+    ],
+    "roles": {
+        "realm": [
+            {
+                "name": "user",
+                "description": "User role",
+                "composite": false
+            },
+            {
+                "name": "admin",
+                "description": "Admin role",
+                "composite": false
+            }
+        ]
+    }
+}

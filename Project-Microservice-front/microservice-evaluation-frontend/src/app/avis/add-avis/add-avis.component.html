@@ -1,0 +1,77 @@
+<div class="review-container">
+  <div class="review-header">
+    Ajouter un avis
+  </div>
+
+  <form (ngSubmit)="addAvis()" class="review-form">
+
+    <div>
+      <label>Nom du projet *</label>
+      <input type="text"
+             [(ngModel)]="avis.projectName"
+             name="projectName"
+             placeholder="ex: projet Alpha">
+    </div>
+
+    <div>
+      <label>Nom de l'évaluateur *</label>
+      <input type="text"
+             [(ngModel)]="avis.evaluatorName"
+             name="evaluatorName"
+             placeholder="Votre nom">
+    </div>
+
+    <div>
+      <label>Email de l'évaluateur *</label>
+      <input type="text"
+             [(ngModel)]="avis.clientName"
+             name="clientName"
+             placeholder="ex: nom@domaine.com">
+    </div>
+
+    <div>
+      <label>Utilisateur évalué *</label>
+      <input type="text"
+             [(ngModel)]="avis.freelancerName"
+             name="freelancerName"
+             placeholder="Nom du freelancer">
+    </div>
+
+    <div>
+      <label>Note *</label>
+      <div class="stars">
+        <span *ngFor="let star of [1,2,3,4,5]"
+              (click)="setNote(star)"
+              [style.color]="star <= avis.score ? '#f97316' : '#475569'">
+          ★
+        </span>
+      </div>
+    </div>
+
+    <div>
+      <label>Commentaire *</label>
+      <textarea [(ngModel)]="avis.comment"
+                name="comment"
+                rows="4"
+                placeholder="Donnez votre avis..."></textarea>
+    </div>
+
+    <div class="checkbox">
+      <input type="checkbox"
+             [(ngModel)]="avis.isAnonymous"
+             name="isAnonymous">
+      <label>Soumettre anonymement</label>
+    </div>
+
+    <div class="buttons">
+      <button type="button" routerLink="/avis" class="btn-cancel">
+        Annuler
+      </button>
+
+      <button type="submit" class="btn-submit">
+        Créer une évaluation
+      </button>
+    </div>
+
+  </form>
+</div>

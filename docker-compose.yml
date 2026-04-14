@@ -1,0 +1,298 @@
+version: '3.8'
+
+services:
+  # --- Infrastructure ---
+  eureka-server:
+    build: ./Projeet-microservice/Eureka-microservice/Eureka-microservice
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    networks:
+      - freelink-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/eureka/apps"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  config-server:
+    build: ./Projeet-microservice/config-server/config-server
+    container_name: config-server
+    ports:
+      - "8888:8888"
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+
+      SPRING_RABBITMQ_HOST: rabbitmq-server
+      SPRING_PROFILES_ACTIVE: native
+      SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCH_LOCATIONS: file:/config
+    volumes:
+      - ./Projeet-microservice/config-server/config-server/src/main/resources/config:/config
+    networks:
+      - freelink-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/API-GATWAYY/default"]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+
+  # --- Databases & Brokers ---
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: rabbitmq-server
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - freelink-net
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  mysql:
+    image: mysql:8.0
+    container_name: freestyle-mysql
+    environment:
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init-mysql.sql:/docker-entrypoint-initdb.d/init-mysql.sql
+    networks:
+      - freelink-net
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  postgres:
+    image: postgres:16
+    container_name: userservice-postgres
+    environment:
+      POSTGRES_DB: users_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - freelink-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d users_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # --- Security ---
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: freestyle-keycloak
+    command: start-dev --import-realm
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HOSTNAME: localhost
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./freelink-realm.json:/opt/keycloak/data/import/realm.json
+    networks:
+      - freelink-net
+
+  # --- Core Gateway ---
+  api-gateway:
+    build: ./Projeet-microservice/API-GATWAYY/API-GATWAYY
+    container_name: api-gateway
+    ports:
+      - "8091:8091"
+    depends_on:
+      config-server:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+    environment:
+      CONFIG_SERVER_URL: http://config-server:8888
+
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+
+      SPRING_RABBITMQ_HOST: rabbitmq-server
+      JWT_ISSUER_URI: http://freestyle-keycloak:8080/realms/freelink
+      JWT_JWK_SET_URI: http://freestyle-keycloak:8080/realms/freelink/protocol/openid-connect/certs
+      USER_SERVICE_URL: http://userservice-app:8000
+    extra_hosts:
+      - "localhost:host-gateway"
+      - "127.0.0.1:host-gateway"
+    networks:
+      - freelink-net
+
+  # --- Functional Microservices ---
+  evaluation-service:
+    build: ./Projeet-microservice/EvaluationM-service/Evaluation-service
+    container_name: evaluation-service
+    depends_on:
+      config-server:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    environment:
+      EUREKA_INSTANCE_HOSTNAME: evaluation-service
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "false"
+      CONFIG_SERVER_URL: http://config-server:8888
+
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+
+      SPRING_RABBITMQ_HOST: rabbitmq-server
+      MYSQL_HOST: mysql
+    networks:
+      - freelink-net
+
+  skills-service:
+    build: ./Projeet-microservice/skills/microservice/microservice
+    container_name: skills-service
+    depends_on:
+      config-server:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    environment:
+      EUREKA_INSTANCE_HOSTNAME: skills-service
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "false"
+      CONFIG_SERVER_URL: http://config-server:8888
+
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+
+      SPRING_RABBITMQ_HOST: rabbitmq-server
+      MYSQL_HOST: mysql
+    networks:
+      - freelink-net
+
+  project-service:
+    build: ./Projeet-microservice/service-projet/service-projet
+    container_name: project-service
+    depends_on:
+      config-server:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    environment:
+      EUREKA_INSTANCE_HOSTNAME: project-service
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "false"
+      CONFIG_SERVER_URL: http://config-server:8888
+
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+
+      SPRING_RABBITMQ_HOST: rabbitmq-server
+      MYSQL_HOST: mysql
+    networks:
+      - freelink-net
+
+  formation-service:
+    build: ./Projeet-microservice/Gestion-Formation/Gestion-Formation
+    container_name: formation-service
+    depends_on:
+      config-server:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    environment:
+      EUREKA_INSTANCE_HOSTNAME: formation-service
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "false"
+      CONFIG_SERVER_URL: http://config-server:8888
+
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+
+      SPRING_RABBITMQ_HOST: rabbitmq-server
+      MYSQL_HOST: mysql
+    networks:
+      - freelink-net
+
+  messagerie-service:
+    build: ./Projeet-microservice/messagerie/messagerie
+    container_name: messagerie-service
+    depends_on:
+      config-server:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    environment:
+      EUREKA_INSTANCE_HOSTNAME: messagerie-service
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "false"
+      CONFIG_SERVER_URL: http://config-server:8888
+
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+
+      SPRING_RABBITMQ_HOST: rabbitmq-server
+      MYSQL_HOST: mysql
+    networks:
+      - freelink-net
+
+  condidature-service:
+    build: ./Projeet-microservice/condidature-service/condidature-service
+    container_name: condidature-service
+    depends_on:
+      config-server:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    environment:
+      EUREKA_INSTANCE_HOSTNAME: condidature-service
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "false"
+      CONFIG_SERVER_URL: http://config-server:8888
+
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+
+      SPRING_RABBITMQ_HOST: rabbitmq-server
+      MYSQL_HOST: mysql
+    networks:
+      - freelink-net
+
+  # --- Django User Service ---
+  userservice:
+    build: 
+      context: ./Projeet-microservice/userservice
+    container_name: userservice-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DJANGO_SECRET_KEY: django-insecure-userservice-dev-key
+      DJANGO_DEBUG: "true"
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,userservice,host.docker.internal,userservice-app
+      CORS_ALLOW_ALL_ORIGINS: "true"
+      POSTGRES_DB: users_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+    ports:
+      - "8000:8000"
+    networks:
+      - freelink-net
+
+  frontend-app:
+    build: ./Project-Microservice-front/front
+    container_name: frontend-app
+    ports:
+      - "4200:80"
+    depends_on:
+      api-gateway:
+        condition: service_started
+    networks:
+      - freelink-net
+
+networks:
+  freelink-net:
+    driver: bridge
+
+volumes:
+  rabbitmq_data:
+  postgres_data:
+  mysql_data:

@@ -1,0 +1,13 @@
+FROM amazoncorretto:17
+
+# 2. Dossier de travail
+WORKDIR /app
+
+# 3. Copier le jar genere et le renommer dans le conteneur
+COPY target/skills-service-0.0.1-SNAPSHOT.jar app.jar
+
+# 4. Exposer le port du microservice
+EXPOSE 8085
+
+# 5. Lancer l'application
+ENTRYPOINT ["java", "-jar", "app.jar"]

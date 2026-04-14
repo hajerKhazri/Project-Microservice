@@ -1,0 +1,114 @@
+<div class="chat-container">
+  <!-- Sidebar: Users List -->
+  <aside class="left card">
+    <div class="panel-head">
+      <h1 class="title">Messages</h1>
+    </div>
+
+    <div class="search">
+      <span class="search-ic">🔎</span>
+      <input type="text" placeholder="Search conversations..." />
+    </div>
+
+    <div class="list">
+      @for (user of users(); track user.id) {
+        <button 
+          class="thread" 
+          [class.active]="selectedUser()?.id === user.id"
+          (click)="selectUser(user)"
+        >
+          <span class="avatar" [style.background]="getGradient(user.id)">
+            {{ user.first_name[0].toUpperCase() }}{{ user.last_name[0].toUpperCase() }}
+          </span>
+          <span class="thread-main">
+            <span class="row1">
+              <span class="name">{{ user.first_name }} {{ user.last_name }}</span>
+            </span>
+            <span class="row2">
+              <span class="role">{{ user.role }}</span>
+            </span>
+          </span>
+        </button>
+      } @empty {
+        <div class="empty-state">No users found</div>
+      }
+    </div>
+  </aside>
+
+  <!-- Main: Chat Window -->
+  <section class="center card">
+    @if (selectedUser()) {
+      <div class="chat-top">
+        <div class="chat-user">
+          <span class="avatar big" [style.background]="getGradient(selectedUser()!.id)">
+            {{ selectedUser()!.first_name[0].toUpperCase() }}
+          </span>
+          <div>
+            <div class="chat-name">{{ selectedUser()!.first_name }} {{ selectedUser()!.last_name }}</div>
+            <div class="chat-sub">Online</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-body">
+        @for (msg of messages(); track msg.id) {
+          <div 
+            [class]="msg.idSender === currentUser()?.id ? 'msg you' : 'msg them'" 
+            [@messageAnimation]
+          >
+            <div class="bubble">
+              <p>{{ msg.content }}</p>
+              <div class="msg-actions">
+                @if (msg.idSender === currentUser()?.id) {
+                  <button class="action-btn edit" (click)="$event.stopPropagation(); startEdit(msg)" title="Edit message">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                  </button>
+                  <button class="action-btn delete" (click)="deleteMessage(msg.id)" title="Delete message">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                  </button>
+                }
+              </div>
+            </div>
+            <div class="meta">{{ formatDate(msg.sentAt) }}</div>
+          </div>
+        } @empty {
+          <div class="empty-state">No messages yet. Start the conversation!</div>
+        }
+      </div>
+
+      <div class="composer-container">
+        @if (editingMessage()) {
+          <div class="edit-indicator">
+            <span class="label">Editing message...</span>
+            <button class="cancel-btn" (click)="cancelEdit()">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              Cancel
+            </button>
+          </div>
+        }
+        <div class="composer" [class.editing]="editingMessage()">
+          <input 
+            type="text" 
+            [ngModel]="newMessageContent()" 
+            (ngModelChange)="newMessageContent.set($event)"
+            (keyup.enter)="sendMessage()"
+            placeholder="Write a message..."
+          >
+          <button class="send" [class.save]="editingMessage()" (click)="sendMessage()" [disabled]="!newMessageContent().trim()">
+            @if (editingMessage()) {
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            } @else {
+              ➤
+            }
+          </button>
+        </div>
+      </div>
+    } @else {
+      <div class="welcome-screen">
+        <div class="welcome-icon">💬</div>
+        <h2>Select a conversation</h2>
+        <p>Pick a user from the left to start chatting</p>
+      </div>
+    }
+  </section>
+</div>

@@ -1,0 +1,530 @@
+<main class="users-page" [class.light-mode]="!isDarkMode">
+  <section class="container state-row" *ngIf="loading || errorMessage || successMessage">
+    <div class="alert loading" *ngIf="loading">Loading users from Django service...</div>
+    <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
+    <div class="alert success" *ngIf="successMessage">{{ successMessage }}</div>
+  </section>
+
+  <ng-container *ngIf="!isAuthenticated; else dashboardView">
+    <section class="container auth-shell dots">
+      <div class="auth-layout">
+        <div class="auth-copy">
+          <a class="brand" routerLink="/">
+            <span class="logo" aria-hidden="true"></span>
+            <span>FreeLink</span>
+          </a>
+
+          <span class="auth-kicker">User space</span>
+          <h1>Open your account space with one clear entry point.</h1>
+          <p>Choose how you want to continue: sign in to access the user dashboard or sign up to create a new account.
+          </p>
+
+          <div class="auth-shortcuts">
+            <button class="btn primary" type="button" (click)="setAuthMode('sign-in')">Sign in</button>
+            <button class="btn ghost" type="button" (click)="setAuthMode('sign-up')">Sign up</button>
+          </div>
+
+          <div class="auth-points glass-card">
+            <article>
+              <strong>Simple entry</strong>
+              <span>One auth page before accessing the user dashboard.</span>
+            </article>
+            <article>
+              <strong>Same design</strong>
+              <span>The experience stays aligned with FreeLink skills and jobs pages.</span>
+            </article>
+            <article>
+              <strong>Django backend</strong>
+              <span>Registration and login are connected to your `user-service`.</span>
+            </article>
+          </div>
+        </div>
+
+        <section class="auth-card glass-card">
+          <div class="auth-tabs">
+            <button class="auth-tab" type="button" [class.active]="authMode === 'sign-in'"
+              (click)="setAuthMode('sign-in')">
+              Sign in
+            </button>
+            <button class="auth-tab" type="button" [class.active]="authMode === 'sign-up'"
+              (click)="setAuthMode('sign-up')">
+              Sign up
+            </button>
+          </div>
+
+          <form *ngIf="authMode === 'sign-in'; else signUpView" class="auth-form" (ngSubmit)="signIn(signInForm)"
+            #signInForm="ngForm">
+            <div class="auth-head">
+              <span>Welcome back</span>
+              <h2>Sign in</h2>
+              <p>Use your username or email to open the dashboard.</p>
+            </div>
+
+            <div class="field">
+              <label for="identifier">Username or email</label>
+              <input id="identifier" name="identifier" type="text" [(ngModel)]="signInData.identifier"
+                #identifierModel="ngModel" [class.invalid-control]="shouldShowError(identifierModel, signInSubmitted)"
+                required placeholder="Ex: fares or user@email.com">
+              <span class="field-error" *ngIf="hasError(identifierModel, 'required', signInSubmitted)">
+                Username or email is required.
+              </span>
+            </div>
+
+            <div class="field">
+              <label for="signInPassword">Password</label>
+              <input id="signInPassword" name="signInPassword" type="password" [(ngModel)]="signInData.password"
+                #signInPasswordModel="ngModel"
+                [class.invalid-control]="shouldShowError(signInPasswordModel, signInSubmitted)" required
+                placeholder="Your password">
+              <span class="field-error" *ngIf="hasError(signInPasswordModel, 'required', signInSubmitted)">
+                Password is required.
+              </span>
+            </div>
+
+            <div class="auth-actions">
+              <button class="btn primary" type="submit" [disabled]="authenticating">
+                {{ authenticating ? 'Signing in...' : 'Sign in' }}
+              </button>
+              <button class="btn ghost" type="button" (click)="setAuthMode('sign-up')">Need an account?</button>
+            </div>
+          </form>
+
+          <ng-template #signUpView>
+            <form class="auth-form signup-form" (ngSubmit)="signUp(signUpForm)" #signUpForm="ngForm">
+              <div class="auth-head">
+                <span>Create account</span>
+                <h2>Sign up</h2>
+                <p>Register first, then sign in and access the full user interface.</p>
+              </div>
+
+              <div class="form-grid">
+                <div class="field">
+                  <label for="signupUsername">Username</label>
+                  <input id="signupUsername" name="signupUsername" type="text" [(ngModel)]="signUpData.username"
+                    #signupUsernameModel="ngModel"
+                    [class.invalid-control]="shouldShowError(signupUsernameModel, signUpSubmitted)" required
+                    maxlength="150" placeholder="Ex: fares">
+                  <span class="field-error" *ngIf="hasError(signupUsernameModel, 'required', signUpSubmitted)">
+                    Username is required.
+                  </span>
+                </div>
+
+                <div class="field">
+                  <label for="signupEmail">Email</label>
+                  <input id="signupEmail" name="signupEmail" type="email" [(ngModel)]="signUpData.email"
+                    #signupEmailModel="ngModel"
+                    [class.invalid-control]="shouldShowError(signupEmailModel, signUpSubmitted)" required email
+                    placeholder="Ex: user@email.com">
+                  <span class="field-error" *ngIf="hasError(signupEmailModel, 'required', signUpSubmitted)">
+                    Email is required.
+                  </span>
+                  <span class="field-error" *ngIf="hasError(signupEmailModel, 'email', signUpSubmitted)">
+                    Enter a valid email.
+                  </span>
+                </div>
+
+                <div class="field">
+                  <label for="signupFirstName">First name</label>
+                  <input id="signupFirstName" name="signupFirstName" type="text" [(ngModel)]="signUpData.first_name"
+                    placeholder="Ex: Fares">
+                </div>
+
+                <div class="field">
+                  <label for="signupLastName">Last name</label>
+                  <input id="signupLastName" name="signupLastName" type="text" [(ngModel)]="signUpData.last_name"
+                    placeholder="Ex: Belgacem">
+                </div>
+
+                <div class="field">
+                  <label for="signupPassword">Password</label>
+                  <input id="signupPassword" name="signupPassword" type="password" [(ngModel)]="signUpData.password"
+                    #signupPasswordModel="ngModel"
+                    [class.invalid-control]="shouldShowError(signupPasswordModel, signUpSubmitted)" required
+                    minlength="6" placeholder="At least 6 characters">
+                  <span class="field-error" *ngIf="hasError(signupPasswordModel, 'required', signUpSubmitted)">
+                    Password is required.
+                  </span>
+                  <span class="field-error" *ngIf="hasError(signupPasswordModel, 'minlength', signUpSubmitted)">
+                    Password must contain at least 6 characters.
+                  </span>
+                </div>
+              </div>
+
+              <div class="default-role-note glass-card">
+                <strong>Default role: Client</strong>
+                <span>Your account is created as a client. After sign in, you can click <em>Become Freelancer</em> and
+                  continue to the skills management page.</span>
+              </div>
+
+              <div class="auth-actions">
+                <button class="btn primary" type="submit" [disabled]="authenticating">
+                  {{ authenticating ? 'Creating...' : 'Sign up' }}
+                </button>
+                <button class="btn ghost" type="button" (click)="setAuthMode('sign-in')">Already have an
+                  account?</button>
+              </div>
+            </form>
+          </ng-template>
+        </section>
+      </div>
+    </section>
+  </ng-container>
+
+  <ng-template #dashboardView>
+    <section class="container users-hero dots">
+      <div class="hero-content">
+        <div class="hero-copy">
+          <a class="brand" routerLink="/">
+            <span class="logo" aria-hidden="true"></span>
+            <span>FreeLink</span>
+          </a>
+
+          <h1>Welcome {{ currentUser ? displayNameFor(currentUser) : 'user' }}</h1>
+          <p>Your account is connected. Continue as {{ currentUser ? roleLabel(currentUser.role) : 'User' }} and choose
+            your next step in FreeLink.</p>
+
+          <div class="hero-actions">
+            <button class="btn orange" type="button" *ngIf="!isCurrentUserFreelancer" (click)="becomeFreelancer()"
+              [disabled]="saving">
+              {{ saving ? 'Updating...' : 'Become Freelancer' }}
+            </button>
+            <a class="btn orange" *ngIf="isCurrentUserFreelancer" routerLink="/skills">Open Skills</a>
+            <button class="btn ghost" type="button" *ngIf="canManageDirectory" (click)="openCreate()">+ Add a
+              user</button>
+            <button class="btn ghost" type="button" *ngIf="canManageDirectory" (click)="refreshData()">Refresh
+              data</button>
+            <a class="btn ghost" routerLink="/jobs">Browse Jobs</a>
+            <button class="btn ghost" type="button" (click)="signOut()">Sign out</button>
+            <button class="btn ghost" type="button" (click)="toggleTheme()">
+              {{ isDarkMode ? 'Light mode' : 'Dark mode' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="toolbar account-toolbar">
+          <div class="account-panel">
+            <span>Current role</span>
+            <strong>{{ currentUser ? roleLabel(currentUser.role) : 'User' }}</strong>
+          </div>
+          <div class="account-panel">
+            <span>Account status</span>
+            <strong>{{ currentUser?.enabled ? 'Enabled' : 'Disabled' }}</strong>
+          </div>
+          <div class="account-panel">
+            <span>Next action</span>
+            <strong>{{ isCurrentUserFreelancer ? 'Complete your skills' : 'Become freelancer' }}</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="container account-grid">
+      <article class="account-card role-card glass-card">
+        <div class="account-card-top">
+          <span>Your role</span>
+          <div class="account-orb role-orb" aria-hidden="true"></div>
+        </div>
+        <strong class="account-title">{{ currentUser ? roleLabel(currentUser.role) : 'User' }}</strong>
+        <div class="account-chip">{{ isCurrentUserFreelancer ? 'Freelancer mode active' : 'Client mode active' }}</div>
+        <p *ngIf="!isCurrentUserFreelancer">You start as a client. Switch to freelancer when you are ready to fill in
+          your skills.</p>
+        <p *ngIf="isCurrentUserFreelancer">Your freelancer role is active. You can now manage your technical profile and
+          skills.</p>
+      </article>
+
+      <article class="account-card email-card glass-card">
+        <div class="account-card-top">
+          <span>Account email</span>
+          <div class="account-orb email-orb" aria-hidden="true"></div>
+        </div>
+        <strong class="account-title">Primary contact</strong>
+        <div class="email-pill">{{ currentUser?.email }}</div>
+        <p>This is the account currently connected to the FreeLink user space.</p>
+      </article>
+
+      <article class="account-card glass-card action-card">
+        <div class="account-card-top">
+          <span>Freelancer path</span>
+          <div class="account-orb action-orb" aria-hidden="true"></div>
+        </div>
+        <strong class="account-title">{{ isCurrentUserFreelancer ? 'Skills unlocked' : 'Become Freelancer' }}</strong>
+        <div class="account-chip action-chip">{{ isCurrentUserFreelancer ? 'Next step ready' : 'Upgrade your profile' }}
+        </div>
+        <p *ngIf="!isCurrentUserFreelancer">Click the button below to switch your role and go directly to the skills
+          management page.</p>
+        <p *ngIf="isCurrentUserFreelancer">Go back to your skills dashboard and complete your profile.</p>
+        <div class="action-footer">
+          <button class="btn primary action-button" type="button" *ngIf="!isCurrentUserFreelancer"
+            (click)="becomeFreelancer()" [disabled]="saving">
+            {{ saving ? 'Updating...' : 'Become Freelancer' }}
+          </button>
+          <a class="btn primary action-button" *ngIf="isCurrentUserFreelancer" routerLink="/skills">Open Skills
+            Management</a>
+          <small class="action-note">{{ isCurrentUserFreelancer ? 'You can now enrich your profile with skills and
+            badges.' : 'One click updates your role and opens the skills page.' }}</small>
+        </div>
+      </article>
+    </section>
+
+    <!-- ── My Applications (Freelancer only) ─────────────────────── -->
+    <section class="container my-applications" *ngIf="isCurrentUserFreelancer">
+      <div class="my-apps-header">
+        <div>
+          <span class="apps-kicker">Freelancer Hub</span>
+          <h2 class="apps-title">My Applications</h2>
+          <p class="apps-subtitle">All project applications submitted under your account.</p>
+        </div>
+        <div class="apps-header-actions">
+          <button class="btn ghost" type="button" (click)="loadMyApplications()">↺ Refresh</button>
+          <a class="btn primary" routerLink="/candidatures">Open All Applications</a>
+        </div>
+      </div>
+
+      <div *ngIf="myApplicationsLoading" class="alert loading">Loading your applications...</div>
+
+      <div class="apps-summary-row" *ngIf="!myApplicationsLoading && myApplications.length">
+        <div class="apps-metric glass-card">
+          <span>Total</span>
+          <strong>{{ myApplications.length }}</strong>
+        </div>
+        <div class="apps-metric glass-card">
+          <span>Pending</span>
+          <strong class="app-color-pending">{{ myApplications | countByStatus : 'PENDING' }}</strong>
+        </div>
+        <div class="apps-metric glass-card">
+          <span>Accepted</span>
+          <strong class="app-color-accepted">{{ myApplications | countByStatus : 'ACCEPTED' }}</strong>
+        </div>
+        <div class="apps-metric glass-card">
+          <span>Rejected</span>
+          <strong class="app-color-rejected">{{ (myApplications | countByStatus : 'REJECTED') + (myApplications |
+            countByStatus : 'REJECTED_PROJECT_CLOSED') }}</strong>
+        </div>
+      </div>
+
+      <div class="apps-list" *ngIf="!myApplicationsLoading">
+        <div *ngFor="let app of myApplicationsSorted" class="app-row glass-card">
+          <div class="app-row-left">
+            <div class="app-icon-badge" [ngClass]="applicationStatusClass(app.status)">
+              {{ app.status === 'ACCEPTED' ? '✓' : (app.status === 'PENDING' ? '⏳' : '✗') }}
+            </div>
+            <div class="app-info">
+              <strong>{{ projectTitleFor(app.projectId) }}</strong>
+              <span class="app-sub">Application #{{ app.id }}</span>
+            </div>
+          </div>
+          <div class="app-row-right">
+            <span class="app-status-pill" [ngClass]="applicationStatusClass(app.status)">
+              {{ applicationStatusLabel(app.status) }}
+            </span>
+            <button *ngIf="app.status === 'PENDING'" class="btn small danger" type="button"
+              [disabled]="withdrawingId === app.id" (click)="withdrawApplication(app)">
+              {{ withdrawingId === app.id ? '…' : 'Withdraw' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="apps-empty glass-card" *ngIf="!myApplications.length">
+          <span class="apps-empty-icon">📋</span>
+          <strong>No applications yet</strong>
+          <p>Browse <a routerLink="/projects">Projects</a> and click <em>Apply Now</em> to submit your first
+            application.</p>
+        </div>
+      </div>
+    </section>
+    <!-- ──────────────────────────────────────────────────────────── -->
+
+    <section class="container metrics" *ngIf="canManageDirectory">
+      <article class="metric glass-card">
+        <span>Total users</span>
+        <strong>{{ totalUsers }}</strong>
+      </article>
+
+      <article class="metric glass-card">
+        <span>Enabled accounts</span>
+        <strong>{{ enabledUsers }}</strong>
+      </article>
+
+      <article class="metric glass-card">
+        <span>Freelancers</span>
+        <strong>{{ freelancerUsers }}</strong>
+      </article>
+
+      <article class="metric glass-card">
+        <span>Admins</span>
+        <strong>{{ adminUsers }}</strong>
+      </article>
+    </section>
+
+    <section class="container admin-directory glass-card" *ngIf="canManageDirectory">
+      <div class="directory-toolbar">
+        <div class="search-wrap">
+          <input class="control" type="search" [ngModel]="searchTerm" (ngModelChange)="onSearchChange($event)"
+            placeholder="Search by username, email, role or status...">
+          <span class="counter">{{ totalUsersLabel }}</span>
+        </div>
+
+        <div class="sort-row">
+          <label for="userSortField">Sort</label>
+          <select id="userSortField" class="control sort-select" [ngModel]="sortField"
+            (ngModelChange)="onSortFieldChange($event)">
+            <option value="created_at">Created</option>
+            <option value="id">ID</option>
+            <option value="username">Username</option>
+            <option value="email">Email</option>
+            <option value="role">Role</option>
+            <option value="enabled">Status</option>
+          </select>
+          <button class="arrow-btn" type="button" (click)="toggleSortDirection()"
+            [attr.aria-label]="'Sort ' + sortDirection">
+            {{ sortDirection === 'asc' ? 'up' : 'down' }}
+          </button>
+        </div>
+
+        <div class="pager-row">
+          <button class="arrow-btn" type="button" (click)="previousPage()" [disabled]="page === 1">left</button>
+          <strong>Page {{ page }} / {{ totalPages }}</strong>
+          <button class="arrow-btn" type="button" (click)="nextPage()" [disabled]="page === totalPages">right</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="container users-grid" *ngIf="canManageDirectory && (!loading || users.length)">
+      <article class="user-card glass-card" *ngFor="let user of pagedUsers; trackBy: trackByUserId">
+        <div class="card-top">
+          <div class="identity">
+            <div class="avatar">{{ initialsFor(user) }}</div>
+            <div>
+              <h2>{{ displayNameFor(user) }}</h2>
+              <p>&#64;{{ user.username }}</p>
+            </div>
+          </div>
+
+          <span class="status-pill" [ngClass]="statusClass(user.enabled)">
+            {{ user.enabled ? 'Enabled' : 'Disabled' }}
+          </span>
+        </div>
+
+        <div class="headline-pills">
+          <span class="role-pill" [ngClass]="roleClass(user.role)">{{ roleLabel(user.role) }}</span>
+          <span class="access-chip" *ngIf="user.is_staff">Staff access</span>
+          <span class="access-chip admin" *ngIf="user.is_superuser">Admin access</span>
+        </div>
+
+        <div class="info-panel">
+          <div class="info-row">
+            <span>Email</span>
+            <strong>{{ user.email }}</strong>
+          </div>
+          <div class="info-row">
+            <span>User ID</span>
+            <strong>#{{ user.id }}</strong>
+          </div>
+          <div class="info-row">
+            <span>Created</span>
+            <strong>{{ formatDate(user.created_at) }}</strong>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button class="btn small ghost" type="button" (click)="openEdit(user)">Edit</button>
+          <button class="btn small danger" type="button" (click)="deleteUser(user)" [disabled]="deletingId === user.id">
+            {{ deletingId === user.id ? 'Deleting...' : 'Delete' }}
+          </button>
+        </div>
+      </article>
+
+      <div class="empty glass-card" *ngIf="!pagedUsers.length && !loading">
+        <h2>No users found</h2>
+        <p>Create the first account or clear the search filter.</p>
+        <button class="btn orange" type="button" (click)="openCreate()">+ Add a user</button>
+      </div>
+    </section>
+
+    <section class="modal-backdrop" *ngIf="isFormOpen" (click)="closeForm()">
+      <form class="user-form glass-card" (ngSubmit)="saveUser(userForm)" #userForm="ngForm"
+        (click)="$event.stopPropagation()">
+        <div class="form-head">
+          <div>
+            <span>{{ isEditMode ? 'Edit user' : 'New user' }}</span>
+            <h2>{{ isEditMode ? displayNameFor(formUser) : 'Add a user' }}</h2>
+          </div>
+          <button class="close-btn" type="button" (click)="closeForm()" aria-label="Close">x</button>
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label for="username">Username</label>
+            <input id="username" name="username" type="text" [(ngModel)]="formUser.username" #usernameModel="ngModel"
+              [class.invalid-control]="shouldShowError(usernameModel)" required maxlength="150" placeholder="Ex: fares">
+            <span class="field-error" *ngIf="hasError(usernameModel, 'required')">Username is required.</span>
+          </div>
+
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" [(ngModel)]="formUser.email" #emailModel="ngModel"
+              [class.invalid-control]="shouldShowError(emailModel)" required email placeholder="Ex: user@email.com">
+            <span class="field-error" *ngIf="hasError(emailModel, 'required')">Email is required.</span>
+            <span class="field-error" *ngIf="hasError(emailModel, 'email')">Enter a valid email.</span>
+          </div>
+
+          <div class="field">
+            <label for="firstName">First name</label>
+            <input id="firstName" name="first_name" type="text" [(ngModel)]="formUser.first_name" maxlength="150"
+              placeholder="Ex: Fares">
+          </div>
+
+          <div class="field">
+            <label for="lastName">Last name</label>
+            <input id="lastName" name="last_name" type="text" [(ngModel)]="formUser.last_name" maxlength="150"
+              placeholder="Ex: Belgacem">
+          </div>
+
+          <div class="field">
+            <label for="role">Role</label>
+            <select id="role" name="role" [(ngModel)]="formUser.role" #roleModel="ngModel"
+              [class.invalid-control]="shouldShowError(roleModel)" required>
+              <option *ngFor="let role of roles" [ngValue]="role">{{ roleLabel(role) }}</option>
+            </select>
+            <span class="field-error" *ngIf="hasError(roleModel, 'required')">Role is required.</span>
+          </div>
+
+          <div class="field">
+            <label for="password">{{ isEditMode ? 'New password (optional)' : 'Password' }}</label>
+            <input id="password" name="password" type="password" [(ngModel)]="formUser.password"
+              #passwordModel="ngModel" [class.invalid-control]="shouldShowError(passwordModel)" [required]="!isEditMode"
+              minlength="6" placeholder="At least 6 characters">
+            <span class="field-error" *ngIf="hasError(passwordModel, 'required')">Password is required.</span>
+            <span class="field-error" *ngIf="hasError(passwordModel, 'minlength')">Password must contain at least 6
+              characters.</span>
+          </div>
+        </div>
+
+        <div class="status-card">
+          <label class="toggle-row" for="enabled">
+            <span>
+              <strong>Account status</strong>
+              <small>{{ formUser.enabled ? 'The user can access the platform.' : 'The account is currently disabled.'
+                }}</small>
+            </span>
+
+            <span class="toggle-control">
+              <input id="enabled" name="enabled" type="checkbox" [(ngModel)]="formUser.enabled">
+              <span class="toggle-slider"></span>
+              <em>{{ formUser.enabled ? 'Enabled' : 'Disabled' }}</em>
+            </span>
+          </label>
+        </div>
+
+        <p class="helper" *ngIf="isEditMode">Leave the password empty if you want to keep the current one.</p>
+
+        <div class="form-actions">
+          <button class="btn ghost" type="button" (click)="closeForm()">Cancel</button>
+          <button class="btn primary" type="submit" [disabled]="saving">
+            {{ saving ? 'Saving...' : (isEditMode ? 'Update user' : 'Create user') }}
+          </button>
+        </div>
+      </form>
+    </section>
+  </ng-template>
+</main>

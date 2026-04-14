@@ -1,0 +1,251 @@
+:root {
+  --bg: #0b2440;
+  --bg-2: #071a2d;
+  --nav: #0b2238;
+  --panel: rgba(255, 255, 255, 0.07);
+  --panel-strong: rgba(255, 255, 255, 0.12);
+  --border: rgba(255, 255, 255, 0.16);
+  --primary: #2f80ed;
+  --primary-dark: #1f66c9;
+  --orange: #f2994a;
+  --danger: #ff3b45;
+  --success: #4bd179;
+  --text: #0b1b2a;
+  --muted-dark: #577089;
+  --white: #ffffff;
+  --muted: rgba(255, 255, 255, 0.72);
+  --shadow: 0 20px 46px rgba(0, 0, 0, 0.28);
+  --max: 1120px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--white);
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+.container {
+  width: min(var(--max), calc(100% - 32px));
+  margin-inline: auto;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: #fff;
+  font-weight: 900;
+  letter-spacing: 0.2px;
+}
+
+.logo {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: conic-gradient(from 180deg, var(--primary), var(--orange), var(--primary));
+  position: relative;
+  box-shadow: 0 16px 30px rgba(47, 128, 237, 0.24);
+}
+
+.logo::after {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  border-radius: 12px;
+  background: var(--nav);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 12px 22px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-weight: 900;
+  font-size: 15px;
+  cursor: pointer;
+  transition: 0.18s transform, 0.18s opacity, 0.18s border-color, 0.18s background;
+  white-space: nowrap;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+  transform: none;
+}
+
+.btn.primary {
+  background: var(--primary);
+  color: #fff;
+}
+
+.btn.primary:hover {
+  background: var(--primary-dark);
+}
+
+.btn.orange {
+  background: var(--orange);
+  color: #111927;
+}
+
+.btn.ghost,
+.btn.ghost-dark {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.24);
+  color: #fff;
+}
+
+.btn.ghost:hover,
+.btn.ghost-dark:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.42);
+}
+
+.btn.danger {
+  background: var(--danger);
+  color: #fff;
+}
+
+.btn.small {
+  min-height: 40px;
+  padding: 9px 16px;
+  font-size: 14px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  color: #174b8e;
+  background: rgba(47, 128, 237, 0.12);
+  border: 1px solid rgba(47, 128, 237, 0.22);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.dots {
+  position: relative;
+  overflow: hidden;
+}
+
+.dots::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 40%, rgba(255, 255, 255, 0.18) 0 3px, transparent 4px),
+    radial-gradient(circle at 60% 30%, rgba(255, 255, 255, 0.14) 0 3px, transparent 4px),
+    radial-gradient(circle at 85% 60%, rgba(255, 255, 255, 0.12) 0 3px, transparent 4px);
+  background-size: 120px 120px;
+  opacity: 0.62;
+  pointer-events: none;
+}
+
+.glass-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  box-shadow: var(--shadow);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field label {
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.field input,
+.field select,
+.field textarea,
+.control {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  outline: none;
+  padding: 12px 14px;
+}
+
+.field textarea {
+  resize: vertical;
+}
+
+.field input::placeholder,
+.field textarea::placeholder,
+.control::placeholder {
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus,
+.control:focus {
+  border-color: rgba(47, 128, 237, 0.7);
+  box-shadow: 0 0 0 4px rgba(47, 128, 237, 0.18);
+}
+
+.field select option,
+.control option {
+  background: #102a45;
+  color: #fff;
+}
+
+@media (max-width: 620px) {
+  .btn {
+    width: 100%;
+  }
+
+  .logo {
+    width: 44px;
+    height: 44px;
+  }
+
+  .logo::after {
+    inset: 10px;
+  }
+}

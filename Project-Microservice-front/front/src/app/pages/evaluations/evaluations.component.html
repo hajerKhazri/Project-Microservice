@@ -1,0 +1,237 @@
+<main class="evaluations-page">
+  <section class="container state-row" *ngIf="loading || errorMessage || successMessage">
+    <div class="alert loading" *ngIf="loading">Loading evaluations through the gateway...</div>
+    <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
+    <div class="alert success" *ngIf="successMessage">{{ successMessage }}</div>
+  </section>
+
+  <section class="container hero-shell dots">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <span class="hero-kicker">Evaluation workspace</span>
+        <h1>Track freelancer reviews from the common front</h1>
+        <p>
+          The evaluation microservice is now part of the shared portal.
+          Create ratings, filter reviews and monitor the score distribution without leaving the main Angular app.
+        </p>
+
+        <div class="hero-actions">
+          <button class="btn primary" type="button" (click)="openCreate()">+ New evaluation</button>
+          <button class="btn ghost" type="button" (click)="refreshData()">Refresh</button>
+        </div>
+      </div>
+
+      <div class="metrics-grid">
+        <article class="metric glass-card">
+          <span>Total reviews</span>
+          <strong>{{ stats?.totalReviews ?? 0 }}</strong>
+        </article>
+        <article class="metric glass-card">
+          <span>Freelancers rated</span>
+          <strong>{{ stats?.distinctFreelancers ?? 0 }}</strong>
+        </article>
+        <article class="metric glass-card">
+          <span>Average score</span>
+          <strong>{{ stats?.globalAverageScore ? (stats?.globalAverageScore | number:'1.1-1') : '0.0' }}</strong>
+        </article>
+        <article class="metric glass-card">
+          <span>Loaded reviews</span>
+          <strong>{{ reviews.length }}</strong>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="container toolbar glass-card">
+    <div class="search-wrap">
+      <input
+        class="control"
+        type="search"
+        name="reviewSearch"
+        [(ngModel)]="searchTerm"
+        placeholder="Search by client, freelancer or comment...">
+      <span class="counter">{{ filteredReviews.length }} review{{ filteredReviews.length === 1 ? '' : 's' }}</span>
+    </div>
+
+    <div class="filter-row">
+      <select class="control compact" name="reviewScore" [(ngModel)]="selectedScore">
+        <option value="">All scores</option>
+        <option value="5">5/5</option>
+        <option value="4">4/5</option>
+        <option value="3">3/5</option>
+        <option value="2">2/5</option>
+        <option value="1">1/5</option>
+      </select>
+    </div>
+  </section>
+
+  <section class="container content-grid">
+    <div class="cards-grid">
+      <article class="review-card glass-card" *ngFor="let review of filteredReviews">
+        <div class="card-top">
+          <span class="score-pill">{{ scoreLabel(review.score) }}</span>
+          <strong class="stars">{{ starsLabel(review.score) }}</strong>
+        </div>
+
+        <h2>{{ review.freelancerName || ('Freelancer #' + review.freelancerId) }}</h2>
+        <p>{{ review.comment }}</p>
+
+        <div class="review-meta">
+          <div>
+            <span>Client</span>
+            <strong>{{ review.clientName }}</strong>
+          </div>
+          <div>
+            <span>Date</span>
+            <strong>{{ formatDate(review.date) }}</strong>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button class="btn small ghost" type="button" (click)="openEdit(review)">Edit</button>
+          <button class="btn small danger" type="button" (click)="deleteReview(review)" [disabled]="deletingId === review.id">
+            {{ deletingId === review.id ? 'Deleting...' : 'Delete' }}
+          </button>
+        </div>
+      </article>
+
+      <div class="empty glass-card" *ngIf="!filteredReviews.length && !loading">
+        <h2>No evaluations found</h2>
+        <p>Create the first review from the shared front.</p>
+        <button class="btn orange" type="button" (click)="openCreate()">+ Add evaluation</button>
+      </div>
+    </div>
+
+    <aside class="side-column">
+      <article class="detail-card glass-card">
+        <span class="detail-kicker">Top freelancers</span>
+        <h2>Leaderboard</h2>
+
+        <div class="ranking-list" *ngIf="topFreelancers.length; else emptyTop">
+          <article class="ranking-item" *ngFor="let item of topFreelancers; let i = index">
+            <div>
+              <strong>#{{ i + 1 }} {{ item.freelancerName || ('Freelancer #' + item.freelancerId) }}</strong>
+              <span>{{ item.reviewCount }} review{{ item.reviewCount === 1 ? '' : 's' }}</span>
+            </div>
+            <em>{{ item.averageScore | number:'1.1-1' }}/5</em>
+          </article>
+        </div>
+
+        <ng-template #emptyTop>
+          <p>No ranking data available yet.</p>
+        </ng-template>
+      </article>
+
+      <article class="detail-card glass-card">
+        <span class="detail-kicker">Score distribution</span>
+        <h2>Review spread</h2>
+
+        <div class="distribution-list" *ngIf="distributionEntries.length; else emptyDistribution">
+          <article class="distribution-item" *ngFor="let item of distributionEntries">
+            <strong>{{ item.score }}/5</strong>
+            <div class="distribution-bar">
+              <span [style.width.%]="(item.count / (stats?.totalReviews || 1)) * 100"></span>
+            </div>
+            <em>{{ item.count }}</em>
+          </article>
+        </div>
+
+        <ng-template #emptyDistribution>
+          <p>No score distribution available yet.</p>
+        </ng-template>
+      </article>
+    </aside>
+  </section>
+
+  <section class="modal-backdrop" *ngIf="isFormOpen" (click)="closeForm()">
+    <form class="editor glass-card" (ngSubmit)="saveReview(reviewForm)" #reviewForm="ngForm" (click)="$event.stopPropagation()">
+      <div class="editor-head">
+        <div>
+          <span>{{ isEditMode ? 'Edit evaluation' : 'New evaluation' }}</span>
+          <h2>{{ isEditMode ? 'Update review' : 'Create a review' }}</h2>
+        </div>
+        <button class="close-btn" type="button" (click)="closeForm()" aria-label="Close">x</button>
+      </div>
+
+      <div class="form-grid">
+        <div class="field">
+          <label for="clientName">Client name</label>
+          <input
+            id="clientName"
+            name="clientName"
+            type="text"
+            [(ngModel)]="formReview.clientName"
+            #clientNameModel="ngModel"
+            [class.invalid-control]="shouldShowError(clientNameModel)"
+            required
+            placeholder="Client full name">
+          <span class="field-error" *ngIf="hasError(clientNameModel, 'required')">Client name is required.</span>
+        </div>
+
+        <div class="field">
+          <label for="freelancerId">Freelancer</label>
+          <select
+            id="freelancerId"
+            name="freelancerId"
+            [(ngModel)]="formReview.freelancerId"
+            #freelancerIdModel="ngModel"
+            [class.invalid-control]="shouldShowError(freelancerIdModel)"
+            (ngModelChange)="onFreelancerChange($event)"
+            required>
+            <option [ngValue]="null">Select a freelancer</option>
+            <option *ngFor="let freelancer of freelancers" [ngValue]="freelancer.id">
+              {{ displayNameFor(freelancer) }}
+            </option>
+          </select>
+          <span class="field-error" *ngIf="hasError(freelancerIdModel, 'required')">Freelancer is required.</span>
+        </div>
+
+        <div class="field">
+          <label for="freelancerName">Freelancer label</label>
+          <input
+            id="freelancerName"
+            name="freelancerName"
+            type="text"
+            [(ngModel)]="formReview.freelancerName"
+            placeholder="Displayed freelancer name">
+        </div>
+
+        <div class="field">
+          <label for="reviewScore">Score</label>
+          <input
+            id="reviewScore"
+            name="reviewScore"
+            type="number"
+            [(ngModel)]="formReview.score"
+            #reviewScoreModel="ngModel"
+            [class.invalid-control]="shouldShowError(reviewScoreModel)"
+            required
+            min="1"
+            max="5">
+          <span class="field-error" *ngIf="hasError(reviewScoreModel, 'required')">Score is required.</span>
+        </div>
+
+        <div class="field full">
+          <label for="reviewComment">Comment</label>
+          <textarea
+            id="reviewComment"
+            name="reviewComment"
+            rows="5"
+            [(ngModel)]="formReview.comment"
+            #reviewCommentModel="ngModel"
+            [class.invalid-control]="shouldShowError(reviewCommentModel)"
+            required
+            placeholder="Write the review summary and feedback."></textarea>
+          <span class="field-error" *ngIf="hasError(reviewCommentModel, 'required')">Comment is required.</span>
+        </div>
+      </div>
+
+      <div class="editor-actions">
+        <button class="btn ghost" type="button" (click)="closeForm()">Cancel</button>
+        <button class="btn primary" type="submit" [disabled]="saving">
+          {{ saving ? 'Saving...' : (isEditMode ? 'Update evaluation' : 'Create evaluation') }}
+        </button>
+      </div>
+    </form>
+  </section>
+</main>

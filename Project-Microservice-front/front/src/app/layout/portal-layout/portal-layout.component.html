@@ -1,0 +1,31 @@
+<header class="portal-navbar">
+  <div class="container nav-shell">
+    <a class="brand" routerLink="/home">
+      <span class="logo" aria-hidden="true"></span>
+      <span>FreeLink</span>
+    </a>
+
+    <nav class="nav-links" aria-label="Microservice navigation">
+      <a
+        *ngFor="let item of navItems"
+        [routerLink]="item.route"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="item.exact ? { exact: true } : { exact: false }">
+        {{ item.label }}
+      </a>
+    </nav>
+
+    <div class="nav-actions" *ngIf="currentUser$ | async as user">
+      <div class="user-pill glass-card">
+        <span>Connected</span>
+        <strong>{{ displayNameFor(user) }}</strong>
+      </div>
+
+      <a class="btn orange" *ngIf="user.role !== 'FREELANCER'" routerLink="/users">Become Freelancer</a>
+      <a class="btn primary" *ngIf="user.role === 'FREELANCER'" routerLink="/skills">Open Skills</a>
+      <button class="btn ghost" type="button" (click)="signOut()">Sign out</button>
+    </div>
+  </div>
+</header>
+
+<router-outlet />
