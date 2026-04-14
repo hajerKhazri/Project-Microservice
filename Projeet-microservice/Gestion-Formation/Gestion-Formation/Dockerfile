@@ -1,14 +1,11 @@
-# 1. Image Java (JDK 17)
-FROM openjdk:17-jdk-slim
-
-# 2. Dossier de travail
+FROM maven:3.9.9-eclipse-temurin-17 AS build
 WORKDIR /app
+COPY pom.xml .
+COPY src src
+RUN mvn -Dmaven.test.skip=true clean package
 
-# 3. Copier le fichier JAR généré
-COPY target/Gestion-Formation-0.0.1-SNAPSHOT.jar app.jar
-
-# 4. Exposer le port du microservice
+FROM eclipse-temurin:17-jre
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8083
-
-# 5. Lancer l'application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]

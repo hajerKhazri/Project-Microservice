@@ -21,7 +21,8 @@ export const PLATFORM_NAV_ITEMS: PlatformNavItem[] = [
   { label: 'Skills', route: '/skills' },
   { label: 'Projects', route: '/projects' },
   { label: 'Formations', route: '/formations' },
-  { label: 'Evaluations', route: '/evaluations' }
+  { label: 'Evaluations', route: '/evaluations' },
+  { label: 'Comms', route: '/communications' }
 ];
 
 export const HOME_SERVICE_CARDS: HomeServiceCard[] = [

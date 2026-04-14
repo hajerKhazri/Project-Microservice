@@ -3,5 +3,5 @@ spring:
     name: service-projet
   cloud:
     config:
-      uri: http://localhost:8888
-      fail-fast: true
+      uri: ${CONFIG_SERVER_URL:http://localhost:8888}
+      fail-fast: false

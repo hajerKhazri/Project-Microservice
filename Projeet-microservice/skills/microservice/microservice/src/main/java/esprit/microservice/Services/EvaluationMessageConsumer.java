@@ -11,8 +11,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class EvaluationMessageConsumer {
 
+    private final RabbitTraceStore rabbitTraceStore;
+
+    public EvaluationMessageConsumer(RabbitTraceStore rabbitTraceStore) {
+        this.rabbitTraceStore = rabbitTraceStore;
+    }
+
     @RabbitListener(queues = RabbitMQConfig.EVALUATION_TO_SKILLS_QUEUE)
     public void receiveMessage(String message) {
+        rabbitTraceStore.record("received", RabbitMQConfig.EVALUATION_TO_SKILLS_QUEUE, "skills-service", message);
         System.out.println("Message reçu dans Skills depuis Evaluation : " + message);
     }
 }

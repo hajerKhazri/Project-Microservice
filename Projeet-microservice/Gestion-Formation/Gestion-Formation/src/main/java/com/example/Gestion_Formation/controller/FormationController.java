@@ -4,6 +4,8 @@ import com.example.Gestion_Formation.Entities.Formation;
 import com.example.Gestion_Formation.dto.FormationWithReviewsDTO;
 import com.example.Gestion_Formation.dto.StatistiquesDTO;
 import com.example.Gestion_Formation.service.FormationService;
+import com.example.Gestion_Formation.service.RabbitTraceEvent;
+import com.example.Gestion_Formation.service.RabbitTraceStore;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,9 +18,11 @@ import java.util.List;
 public class FormationController {
 
     private final FormationService formationService;
+    private final RabbitTraceStore rabbitTraceStore;
 
-    public FormationController(FormationService formationService) {
+    public FormationController(FormationService formationService, RabbitTraceStore rabbitTraceStore) {
         this.formationService = formationService;
+        this.rabbitTraceStore = rabbitTraceStore;
     }
 
     @PostMapping
@@ -33,13 +37,20 @@ public class FormationController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Formation> getById(@PathVariable Long id) {
-        return ResponseEntity.ok(formationService.getById(id));
+        try {
+            return ResponseEntity.ok(formationService.getById(id));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
-    // Feign : Formation + ses évaluations depuis Evaluation-Service
     @GetMapping("/{id}/with-reviews")
     public ResponseEntity<FormationWithReviewsDTO> getByIdWithReviews(@PathVariable Long id) {
-        return ResponseEntity.ok(formationService.getByIdWithReviews(id));
+        try {
+            return ResponseEntity.ok(formationService.getByIdWithReviews(id));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @GetMapping
@@ -56,5 +67,10 @@ public class FormationController {
     @GetMapping("/statistiques")
     public ResponseEntity<StatistiquesDTO> getStatistiques() {
         return ResponseEntity.ok(formationService.getStatistiques());
+    }
+
+    @GetMapping("/debug/rabbit-events")
+    public ResponseEntity<List<RabbitTraceEvent>> getRabbitEvents() {
+        return ResponseEntity.ok(rabbitTraceStore.snapshot());
     }
 }

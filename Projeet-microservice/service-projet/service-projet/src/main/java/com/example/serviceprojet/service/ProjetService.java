@@ -7,6 +7,7 @@ import com.example.serviceprojet.entite.Projet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -22,14 +23,22 @@ public class ProjetService implements IProjetService {
 
     public Projet getProjetWithReviews(Long id) {
         Projet projet = projetRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Projet non trouvé avec l'id: " + id));
-        List<ReviewDTO> reviews = evaluationClient.getReviewsByProjet(id);
+                .orElseThrow(() -> new RuntimeException("Projet non trouve avec l'id: " + id));
+
+        List<ReviewDTO> reviews;
+        try {
+            reviews = evaluationClient.getReviewsByProjet(id);
+        } catch (Exception e) {
+            reviews = List.of();
+            System.out.println("Evaluation-Service indisponible pour le projet " + id + ", reviews vides");
+        }
+
         projet.setReviews(reviews);
         return projet;
     }
+
     @Autowired
     private ProjetEventProducer eventProducer;
-
 
     @Override
     public Projet ajouterProjet(Projet projet) {
@@ -56,7 +65,7 @@ public class ProjetService implements IProjetService {
     @Override
     public Projet modifierProjet(Long id, Projet projetDetails) {
         Projet projet = projetRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Projet non trouvé avec l'id: " + id));
+                .orElseThrow(() -> new RuntimeException("Projet non trouve avec l'id: " + id));
 
         projet.setTitle(projetDetails.getTitle());
         projet.setDescription(projetDetails.getDescription());
@@ -69,7 +78,7 @@ public class ProjetService implements IProjetService {
     @Override
     public void supprimerProjet(Long id) {
         Projet projet = projetRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Projet non trouvé avec l'id: " + id));
+                .orElseThrow(() -> new RuntimeException("Projet non trouve avec l'id: " + id));
         projetRepository.delete(projet);
     }
 }

@@ -9,6 +9,7 @@ import { EvaluationsComponent } from './pages/evaluations/evaluations.component'
 import { FormationsComponent } from './pages/formations/formations.component';
 import { PlatformHomeComponent } from './pages/platform-home/platform-home.component';
 import { ProjectsComponent } from './pages/projects/projects.component';
+import { CommunicationsComponent } from './pages/communications/communications.component';
 
 export const routes: Routes = [
   { path: '', pathMatch: 'full', redirectTo: 'auth' },
@@ -25,6 +26,7 @@ export const routes: Routes = [
       { path: 'projects', component: ProjectsComponent, title: 'FreeLink - Projects' },
       { path: 'formations', component: FormationsComponent, title: 'FreeLink - Formations' },
       { path: 'evaluations', component: EvaluationsComponent, title: 'FreeLink - Evaluations' },
+      { path: 'communications', component: CommunicationsComponent, title: 'FreeLink - Communications' },
       { path: 'proofs', redirectTo: 'skills', pathMatch: 'full' },
       { path: 'portfolio', redirectTo: 'skills', pathMatch: 'full' },
       { path: '**', redirectTo: 'home' }

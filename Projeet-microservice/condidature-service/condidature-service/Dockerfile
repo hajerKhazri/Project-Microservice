@@ -1,14 +1,11 @@
-# 1. Image Java (JDK)
-FROM amazoncorretto:17
-
-# 2. Dossier de travail
+FROM maven:3.9.9-eclipse-temurin-17 AS build
 WORKDIR /app
+COPY pom.xml .
+COPY src src
+RUN mvn -Dmaven.test.skip=true clean package
 
-# 3. Copier le jar
-COPY target/*.jar app.jar
-
-# 4. Exposer le port du microservice
+FROM eclipse-temurin:17-jre
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8081
-
-# 5. Lancer l'application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]

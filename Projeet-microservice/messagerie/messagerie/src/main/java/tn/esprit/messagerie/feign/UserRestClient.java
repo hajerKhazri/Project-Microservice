@@ -4,8 +4,8 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-// The @FeignClient name should match the application name of the User microservice registered in Eureka
-@FeignClient(name = "user-service")
+// Use a direct URL because the Django user-service is not registered in Eureka.
+@FeignClient(name = "user-service", url = "${USER_SERVICE_URL:http://localhost:8000}")
 public interface UserRestClient {
 
     @GetMapping("/api/users/{id}")

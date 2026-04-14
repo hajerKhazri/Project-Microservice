@@ -24,14 +24,17 @@ public class FormationServiceImpl implements FormationService {
     private final FormationRepository formationRepository;
     private final EvaluationFeignClient evaluationFeignClient;
     private final FormationEventProducer formationEventProducer;
+    private final RabbitTraceStore rabbitTraceStore;
 
     public FormationServiceImpl(FormationRepository formationRepository,
                                 @Qualifier("com.example.Gestion_Formation.feign.EvaluationFeignClient")
                                 EvaluationFeignClient evaluationFeignClient,
-                                FormationEventProducer formationEventProducer) {
+                                FormationEventProducer formationEventProducer,
+                                RabbitTraceStore rabbitTraceStore) {
         this.formationRepository = formationRepository;
         this.evaluationFeignClient = evaluationFeignClient;
         this.formationEventProducer = formationEventProducer;
+        this.rabbitTraceStore = rabbitTraceStore;
     }
 
     @Override
@@ -178,6 +181,7 @@ public class FormationServiceImpl implements FormationService {
     }
     @RabbitListener(queues = "reviewQueue")
     public void receiveMessage(String message) {
+        rabbitTraceStore.record("received", "reviewQueue", "gestion-formation", message);
         System.out.println("🔥 MESSAGE REÇU DANS FORMATION : " + message);
     }
 }

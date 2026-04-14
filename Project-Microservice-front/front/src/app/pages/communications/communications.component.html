@@ -1,0 +1,270 @@
+<main class="communications-page">
+  <section class="container hero-shell glass-card dots">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <span class="hero-kicker">Live communication visibility</span>
+        <h1>See who talks to whom in FreeLink</h1>
+        <p>
+          This page shows the communication architecture we wired in Docker and logs every HTTP call made by the
+          front to the gateway or the user-service routes. Use the probes below to trigger flows and watch them in real time.
+        </p>
+      </div>
+
+      <article class="hero-summary glass-card">
+        <span class="summary-kicker">Highlighted chain</span>
+        <strong>{{ highlightedChain }}</strong>
+        <div class="summary-row">
+          <span>Gateway base URL</span>
+          <strong>{{ gatewayBaseUrl }}</strong>
+        </div>
+        <div class="summary-row">
+          <span>What you can see here</span>
+          <strong>Front requests + triggered backend chains</strong>
+        </div>
+        <div class="summary-row">
+          <span>Projects available</span>
+          <strong>{{ projectCount }}</strong>
+        </div>
+        <div class="summary-row">
+          <span>Formations available</span>
+          <strong>{{ formationCount }}</strong>
+        </div>
+        <div class="summary-row">
+          <span>Project IDs</span>
+          <strong>{{ projectIdsLabel }}</strong>
+        </div>
+        <div class="summary-row">
+          <span>Formation IDs</span>
+          <strong>{{ formationIdsLabel }}</strong>
+        </div>
+        <p>
+          Internal backend calls such as Feign or RabbitMQ do not stream directly in the browser, so this page highlights
+          the expected backend chain while the front request is captured live.
+        </p>
+        <div class="summary-actions">
+          <button class="btn ghost small" type="button" (click)="refreshDemoSources()" [disabled]="isRefreshingSources">
+            {{ isRefreshingSources ? 'Refreshing...' : 'Refresh sources' }}
+          </button>
+          <button class="btn primary small" type="button" (click)="prepareDemoData()" [disabled]="isPreparingDemoData">
+            {{ isPreparingDemoData ? 'Preparing...' : 'Prepare demo data' }}
+          </button>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="container state-row" *ngIf="infoMessage || errorMessage">
+    <div class="alert success" *ngIf="infoMessage">{{ infoMessage }}</div>
+    <div class="alert error" *ngIf="errorMessage">{{ errorMessage }}</div>
+  </section>
+
+  <section class="container section-block">
+    <div class="section-head">
+      <div>
+        <span class="section-kicker">Architecture map</span>
+        <h2>Communications currently configured</h2>
+      </div>
+    </div>
+
+    <div class="flow-grid">
+      <article class="flow-card glass-card" *ngFor="let flow of flows" [attr.data-mode]="flow.mode">
+        <div class="flow-top">
+          <span class="mode-chip">{{ flow.mode }}</span>
+          <strong>{{ flow.source }} -> {{ flow.target }}</strong>
+        </div>
+        <p>{{ flow.details }}</p>
+        <small>Visible when: {{ flow.visibleWhen }}</small>
+      </article>
+    </div>
+  </section>
+
+  <section class="container section-block">
+    <div class="section-head">
+      <div>
+        <span class="section-kicker">Trigger from front</span>
+        <h2>Simple requests you can launch now</h2>
+      </div>
+      <button class="btn ghost small" type="button" (click)="clearLog()">Clear log</button>
+    </div>
+
+    <div class="probe-grid">
+      <article class="probe-card glass-card" *ngFor="let probe of probes" [attr.data-accent]="probe.accent">
+        <span class="probe-tag">{{ probe.title }}</span>
+        <h3>{{ probe.title }}</h3>
+        <p>{{ probe.description }}</p>
+
+        <div class="probe-chain">
+          <span>Expected chain</span>
+          <strong>{{ probe.chain }}</strong>
+        </div>
+
+        <button
+          class="btn primary"
+          type="button"
+          (click)="runProbe(probe.id)"
+          [disabled]="isRunning(probe.id)">
+          {{ isRunning(probe.id) ? 'Running...' : probe.actionLabel }}
+        </button>
+      </article>
+    </div>
+  </section>
+
+  <section class="container section-block">
+    <div class="section-head">
+      <div>
+        <span class="section-kicker">Chained backend flows</span>
+        <h2>Requests that trigger service-to-service communication</h2>
+      </div>
+    </div>
+
+    <div class="chain-grid">
+      <article class="chain-card glass-card">
+        <span class="probe-tag">Project with reviews</span>
+        <h3>Project -> Evaluation</h3>
+        <p>
+          This request goes through the gateway, enters `service-projet` and can trigger a Feign call to `evaluation-service`.
+        </p>
+
+        <div class="field">
+          <label for="projectChainId">Project ID</label>
+          <input id="projectChainId" type="number" min="1" [(ngModel)]="projectChainId" />
+        </div>
+
+        <div class="probe-chain">
+          <span>Expected chain</span>
+          <strong>Front -> API Gateway -> service-projet -> evaluation-service</strong>
+        </div>
+
+        <button
+          class="btn orange"
+          type="button"
+          (click)="runProbe('project-review-chain')"
+          [disabled]="isRunning('project-review-chain')">
+          {{ isRunning('project-review-chain') ? 'Running...' : 'Run project chain' }}
+        </button>
+      </article>
+
+      <article class="chain-card glass-card">
+        <span class="probe-tag">Formation with reviews</span>
+        <h3>Formation -> Evaluation</h3>
+        <p>
+          This request goes through the gateway, enters `gestion-formation` and can trigger a Feign call to `evaluation-service`.
+        </p>
+
+        <div class="field">
+          <label for="formationChainId">Formation ID</label>
+          <input id="formationChainId" type="number" min="1" [(ngModel)]="formationChainId" />
+        </div>
+
+        <div class="probe-chain">
+          <span>Expected chain</span>
+          <strong>Front -> API Gateway -> gestion-formation -> evaluation-service</strong>
+        </div>
+
+        <button
+          class="btn orange"
+          type="button"
+          (click)="runProbe('formation-review-chain')"
+          [disabled]="isRunning('formation-review-chain')">
+          {{ isRunning('formation-review-chain') ? 'Running...' : 'Run formation chain' }}
+        </button>
+      </article>
+    </div>
+  </section>
+
+  <section class="container section-block">
+    <div class="section-head">
+      <div>
+        <span class="section-kicker">RabbitMQ monitor</span>
+        <h2>Latest asynchronous backend messages</h2>
+      </div>
+      <button class="btn ghost small" type="button" (click)="refreshRabbitMonitor()" [disabled]="isRefreshingRabbit">
+        {{ isRefreshingRabbit ? 'Refreshing...' : 'Refresh Rabbit log' }}
+      </button>
+    </div>
+
+    <div class="alert success" *ngIf="rabbitInfoMessage">{{ rabbitInfoMessage }}</div>
+
+    <div class="rabbit-grid">
+      <article class="rabbit-card glass-card" *ngFor="let group of rabbitGroups">
+        <div class="flow-top">
+          <span class="mode-chip">RabbitMQ</span>
+          <strong>{{ group.label }}</strong>
+        </div>
+
+        <div class="probe-chain">
+          <span>Service</span>
+          <strong>{{ group.service }}</strong>
+        </div>
+
+        <div class="probe-chain">
+          <span>Queue</span>
+          <strong>{{ group.queue }}</strong>
+        </div>
+
+        <div class="empty-state rabbit-empty" *ngIf="!group.events.length">
+          No event yet for this service. Create a review from the Evaluations page.
+        </div>
+
+        <div class="rabbit-list" *ngIf="group.events.length">
+          <article class="rabbit-event" *ngFor="let event of group.events; trackBy: trackRabbitEvent">
+            <div class="trace-meta">
+              <span>{{ event.timestamp | date: 'HH:mm:ss' }}</span>
+              <span>{{ event.direction | uppercase }}</span>
+            </div>
+            <strong>{{ event.queue }}</strong>
+            <p>{{ event.message }}</p>
+          </article>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section class="container section-block">
+    <div class="section-head">
+      <div>
+        <span class="section-kicker">Live HTTP log</span>
+        <h2>Requests captured by the front</h2>
+      </div>
+    </div>
+
+    <ng-container *ngIf="traces$ | async as traces">
+      <div class="empty-state glass-card" *ngIf="!traces.length">
+        No communication captured yet. Launch one of the probes above and the requests will appear here.
+      </div>
+
+      <div class="trace-list" *ngIf="traces.length">
+        <article class="trace-card glass-card" *ngFor="let entry of traces">
+          <div class="trace-top">
+            <div class="trace-title">
+              <span class="method-chip">{{ entry.method }}</span>
+              <strong>{{ entry.url }}</strong>
+            </div>
+
+            <span class="status-chip" [attr.data-status]="entry.status">
+              {{ entry.status | uppercase }}<ng-container *ngIf="entry.httpStatus"> {{ entry.httpStatus }}</ng-container>
+            </span>
+          </div>
+
+          <div class="trace-meta">
+            <span>{{ entry.startedAt | date: 'HH:mm:ss' }}</span>
+            <span *ngIf="entry.durationMs !== undefined">{{ entry.durationMs }} ms</span>
+            <span *ngIf="entry.responseSize !== undefined">{{ entry.responseSize }} chars</span>
+          </div>
+
+          <div class="trace-previews">
+            <p *ngIf="entry.requestPreview">
+              <strong>Request:</strong> {{ entry.requestPreview }}
+            </p>
+            <p *ngIf="entry.responsePreview">
+              <strong>Response:</strong> {{ entry.responsePreview }}
+            </p>
+            <p *ngIf="entry.errorPreview" class="error-preview">
+              <strong>Error:</strong> {{ entry.errorPreview }}
+            </p>
+          </div>
+        </article>
+      </div>
+    </ng-container>
+  </section>
+</main>

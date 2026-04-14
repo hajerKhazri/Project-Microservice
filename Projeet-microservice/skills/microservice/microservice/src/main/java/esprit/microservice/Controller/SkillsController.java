@@ -3,6 +3,8 @@ package esprit.microservice.Controller;
 import esprit.microservice.Dto.SkillRequest;
 import esprit.microservice.Dto.SkillResponse;
 import esprit.microservice.Services.IskillsInterface;
+import esprit.microservice.Services.RabbitTraceEvent;
+import esprit.microservice.Services.RabbitTraceStore;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +18,7 @@ import java.util.List;
 public class SkillsController {
 
     private final IskillsInterface iskillsInterface;
+    private final RabbitTraceStore rabbitTraceStore;
 
     @PostMapping("/add")
     public SkillResponse addSkill(@RequestBody SkillRequest skillRequest) {
@@ -45,5 +48,9 @@ public class SkillsController {
     @GetMapping("/test/{id}")
     public String getSkillInfo(@PathVariable Long id) {
         return "Skill trouvé avec id = " + id;
+    }
+    @GetMapping("/debug/rabbit-events")
+    public List<RabbitTraceEvent> getRabbitEvents() {
+        return rabbitTraceStore.snapshot();
     }
 }

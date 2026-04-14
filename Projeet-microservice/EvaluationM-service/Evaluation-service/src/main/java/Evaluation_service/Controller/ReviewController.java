@@ -1,6 +1,8 @@
 package Evaluation_service.Controller;
 
 import Evaluation_service.Repository.ReviewRepository;
+import Evaluation_service.Service.RabbitTraceEvent;
+import Evaluation_service.Service.RabbitTraceStore;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import Evaluation_service.Entity.Review;
@@ -18,10 +20,12 @@ public class ReviewController {
 
     private final ReviewService reviewService;
     private final ReviewRepository reviewRepository;
+    private final RabbitTraceStore rabbitTraceStore;
 
-    public ReviewController(ReviewService reviewService, ReviewRepository reviewRepository) {
+    public ReviewController(ReviewService reviewService, ReviewRepository reviewRepository, RabbitTraceStore rabbitTraceStore) {
         this.reviewService = reviewService;
         this.reviewRepository = reviewRepository;
+        this.rabbitTraceStore = rabbitTraceStore;
     }
 
     // CREATE
@@ -118,6 +122,11 @@ public class ReviewController {
             distribution.put(((Number) row[0]).intValue(), ((Number) row[1]).longValue());
         }
         return ResponseEntity.ok(distribution);  // Spring convertit automatiquement en JSON
+    }
+
+    @GetMapping("/debug/rabbit-events")
+    public ResponseEntity<List<RabbitTraceEvent>> getRabbitEvents() {
+        return ResponseEntity.ok(rabbitTraceStore.snapshot());
     }
     //endpoint de OpenFeign
     @GetMapping("/test/{id}")

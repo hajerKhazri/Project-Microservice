@@ -54,8 +54,9 @@
 }
 
 .hero-grid {
-  grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
-  align-items: center;
+  grid-template-columns: minmax(0, 620px) minmax(280px, 420px);
+  justify-content: center;
+  align-items: stretch;
 }
 
 .hero-kicker,
@@ -104,6 +105,7 @@
 
 .metrics-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
 }
 
 .metric,
@@ -167,12 +169,14 @@
 }
 
 .content-grid {
-  grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
+  grid-template-columns: minmax(0, 760px) minmax(300px, 420px);
+  justify-content: center;
   align-items: start;
 }
 
 .cards-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 360px));
+  justify-content: center;
 }
 
 .formation-card {
@@ -258,6 +262,8 @@
   gap: 18px;
   position: sticky;
   top: 104px;
+  width: min(100%, 420px);
+  justify-self: center;
 }
 
 .detail-grid {
@@ -273,10 +279,31 @@
 .formation-meta > div,
 .detail-box,
 .upload-card {
+  display: grid;
+  align-content: start;
+  gap: 10px;
   padding: 16px;
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.formation-meta > div,
+.detail-box {
+  min-height: 112px;
+}
+
+.formation-meta span,
+.formation-meta strong,
+.detail-box span,
+.detail-box strong {
+  display: block;
+}
+
+.formation-meta strong,
+.detail-box strong {
+  line-height: 1.1;
+  overflow-wrap: anywhere;
 }
 
 .upload-card {

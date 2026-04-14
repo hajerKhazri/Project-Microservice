@@ -8,14 +8,17 @@ import org.springframework.stereotype.Service;
 public class RabbitProducer {
 
     private final RabbitTemplate rabbitTemplate;
+    private final RabbitTraceStore rabbitTraceStore;
 
-    public RabbitProducer(RabbitTemplate rabbitTemplate) {
+    public RabbitProducer(RabbitTemplate rabbitTemplate, RabbitTraceStore rabbitTraceStore) {
         this.rabbitTemplate = rabbitTemplate;
+        this.rabbitTraceStore = rabbitTraceStore;
     }
 
     // 🔹 ancien code (NE PAS MODIFIER)
     public void sendMessage(String message) {
         rabbitTemplate.convertAndSend("reviewQueue", message);
+        rabbitTraceStore.record("sent", "reviewQueue", "evaluation-service", message);
         System.out.println("Message envoyé : " + message);
     }
 
@@ -25,6 +28,7 @@ public class RabbitProducer {
                 RabbitMQConfig.EVALUATION_TO_SKILLS_QUEUE,
                 message
         );
+        rabbitTraceStore.record("sent", RabbitMQConfig.EVALUATION_TO_SKILLS_QUEUE, "evaluation-service", message);
         System.out.println("Message envoyé vers Skills : " + message);
     }
 }

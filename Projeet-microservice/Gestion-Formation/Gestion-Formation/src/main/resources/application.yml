@@ -34,10 +34,10 @@ spring:
       max-request-size: 10MB
 
   rabbitmq:
-    host: localhost
-    port: 5672
-    username: guest
-    password: guest
+    host: ${SPRING_RABBITMQ_HOST:localhost}
+    port: ${SPRING_RABBITMQ_PORT:5672}
+    username: ${SPRING_RABBITMQ_USERNAME:guest}
+    password: ${SPRING_RABBITMQ_PASSWORD:guest}
 
 eureka:
   client:
@@ -47,9 +47,8 @@ eureka:
     fetch-registry: true
 
   instance:
-    prefer-ip-address: true
-    ip-address: 127.0.0.1
-    hostname: localhost
+    prefer-ip-address: ${EUREKA_INSTANCE_PREFER_IP_ADDRESS:false}
+    hostname: ${EUREKA_INSTANCE_HOSTNAME:localhost}
     instance-id: ${spring.application.name}:${server.port}
 
 springdoc:

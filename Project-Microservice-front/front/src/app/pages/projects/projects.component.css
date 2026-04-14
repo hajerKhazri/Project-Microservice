@@ -53,8 +53,9 @@
 }
 
 .hero-grid {
-  grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
-  align-items: center;
+  grid-template-columns: minmax(0, 620px) minmax(280px, 420px);
+  justify-content: center;
+  align-items: stretch;
 }
 
 .hero-kicker,
@@ -102,6 +103,7 @@
 
 .metrics-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
 }
 
 .metric,
@@ -175,14 +177,16 @@
 }
 
 .content-grid {
-  grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+  grid-template-columns: minmax(0, 760px) minmax(300px, 420px);
+  justify-content: center;
   align-items: start;
 }
 
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 360px));
   gap: 20px;
+  justify-content: center;
 }
 
 .project-card {
@@ -257,6 +261,8 @@
   gap: 18px;
   position: sticky;
   top: 104px;
+  width: min(100%, 420px);
+  justify-self: center;
 }
 
 .detail-grid {
@@ -271,10 +277,27 @@
 
 .project-meta > div,
 .detail-box {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-height: 112px;
   padding: 16px;
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.project-meta span,
+.project-meta strong,
+.detail-box span,
+.detail-box strong {
+  display: block;
+}
+
+.project-meta strong,
+.detail-box strong {
+  line-height: 1.1;
+  overflow-wrap: anywhere;
 }
 
 .empty {

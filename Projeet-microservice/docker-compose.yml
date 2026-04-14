@@ -1,0 +1,331 @@
+name: freelink-backend
+
+x-backend-env: &backend-env
+  EUREKA_URL: http://eureka-server:8761/eureka
+  CONFIG_SERVER_URL: http://config-server:8888
+  MYSQL_HOST: mysql
+  MYSQL_PORT: "3306"
+  MYSQL_USERNAME: root
+  MYSQL_PASSWORD: root
+  SPRING_RABBITMQ_HOST: rabbitmq
+  SPRING_RABBITMQ_PORT: "5672"
+  SPRING_RABBITMQ_USERNAME: guest
+  SPRING_RABBITMQ_PASSWORD: guest
+  SPRING_CLOUD_CONFIG_FAIL_FAST: "false"
+  SPRING_CLOUD_CONFIG_ENABLED: "false"
+
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_ROOT_HOST: "%"
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - backend-network
+
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: users_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - backend-network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    restart: unless-stopped
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 15s
+      retries: 12
+      start_period: 60s
+    networks:
+      - backend-network
+
+  userservice:
+    build:
+      context: ./userservice
+    image: freelink/userservice:1.0
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DJANGO_SECRET_KEY: django-insecure-userservice-dev-key
+      DJANGO_DEBUG: "true"
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,userservice,api-gateway,host.docker.internal
+      ENABLE_DJANGO_CORS: "true"
+      CORS_ALLOW_ALL_ORIGINS: "true"
+      POSTGRES_DB: users_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
+    ports:
+      - "8000:8000"
+    networks:
+      - backend-network
+
+  eureka-server:
+    build:
+      context: ./Eureka-microservice/Eureka-microservice
+    image: freelink/eureka-server:1.0
+    restart: unless-stopped
+    ports:
+      - "8761:8761"
+    networks:
+      - backend-network
+
+  config-server:
+    build:
+      context: ./config-server/config-server
+    image: freelink/config-server:1.0
+    restart: unless-stopped
+    depends_on:
+      - eureka-server
+    environment:
+      EUREKA_URL: http://eureka-server:8761/eureka
+      EUREKA_INSTANCE_HOSTNAME: config-server
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "false"
+      CONFIG_REPO_CLONE_ON_START: "false"
+    ports:
+      - "8888:8888"
+    networks:
+      - backend-network
+
+  evaluation-service:
+    build:
+      context: ./EvaluationM-service/Evaluation-service
+    image: freelink/evaluation-service:1.0
+    restart: unless-stopped
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+      config-server:
+        condition: service_started
+    environment:
+      <<: *backend-env
+      EUREKA_INSTANCE_HOSTNAME: evaluation-service
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "false"
+      EVALUATION_SERVICE_PORT: "8094"
+    ports:
+      - "8094:8094"
+    networks:
+      - backend-network
+
+  skills-service:
+    build:
+      context: ./skills/microservice/microservice
+    image: freelink/skills-service:1.0
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+      config-server:
+        condition: service_started
+    environment:
+      <<: *backend-env
+      MYSQL_DB_SKILLS: microservice
+      EUREKA_INSTANCE_HOSTNAME: skills-service
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "false"
+      SKILLS_SERVICE_PORT: "8085"
+    ports:
+      - "8085:8085"
+    networks:
+      - backend-network
+
+  service-projet:
+    build:
+      context: ./service-projet/service-projet
+    image: freelink/service-projet:1.0
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+      config-server:
+        condition: service_started
+    environment:
+      <<: *backend-env
+      MYSQL_DB_PROJECT: projetdb
+      EUREKA_INSTANCE_HOSTNAME: service-projet
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "false"
+      PROJECT_SERVICE_PORT: "8086"
+    ports:
+      - "8086:8086"
+    networks:
+      - backend-network
+
+  gestion-formation:
+    build:
+      context: ./Gestion-Formation/Gestion-Formation
+    image: freelink/gestion-formation:1.0
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+      config-server:
+        condition: service_started
+    environment:
+      <<: *backend-env
+      MYSQL_DB_FORMATION: gestion_formation
+      EUREKA_INSTANCE_HOSTNAME: gestion-formation
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "false"
+      FORMATION_PORT: "8083"
+    ports:
+      - "8083:8083"
+    volumes:
+      - formation_uploads:/app/uploads
+    networks:
+      - backend-network
+
+  condidature-service:
+    build:
+      context: ./condidature-service/condidature-service
+    image: freelink/condidature-service:1.0
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+      config-server:
+        condition: service_started
+    environment:
+      <<: *backend-env
+      MYSQL_DB_CANDIDATURE: condidature_db
+      EUREKA_INSTANCE_HOSTNAME: condidature-service
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "false"
+      CANDIDATURE_SERVICE_PORT: "8081"
+    ports:
+      - "8081:8081"
+    networks:
+      - backend-network
+
+  messagerie-service:
+    build:
+      context: ./messagerie/messagerie
+    image: freelink/messagerie-service:1.0
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      userservice:
+        condition: service_started
+      eureka-server:
+        condition: service_started
+      config-server:
+        condition: service_started
+    environment:
+      <<: *backend-env
+      MYSQL_DB_MESSAGERIE: messagerie_db
+      USER_SERVICE_URL: http://userservice:8000
+      EUREKA_INSTANCE_HOSTNAME: messagerie-service
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "false"
+      MESSAGERIE_SERVICE_PORT: "8087"
+    ports:
+      - "8087:8087"
+    networks:
+      - backend-network
+
+  api-gateway:
+    build:
+      context: ./API-GATWAYY/API-GATWAYY
+    image: freelink/api-gateway:1.0
+    restart: unless-stopped
+    depends_on:
+      userservice:
+        condition: service_started
+      eureka-server:
+        condition: service_started
+      evaluation-service:
+        condition: service_started
+      skills-service:
+        condition: service_started
+      service-projet:
+        condition: service_started
+      gestion-formation:
+        condition: service_started
+      condidature-service:
+        condition: service_started
+      messagerie-service:
+        condition: service_started
+    environment:
+      EUREKA_URL: http://eureka-server:8761/eureka
+      EUREKA_INSTANCE_HOSTNAME: api-gateway
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "false"
+      USER_SERVICE_URL: http://userservice:8000
+      GATEWAY_PORT: "8091"
+    ports:
+      - "8091:8091"
+    networks:
+      - backend-network
+
+  frontend:
+    build:
+      context: ../Project-Microservice-front/front
+    image: freelink/frontend:1.0
+    restart: unless-stopped
+    depends_on:
+      api-gateway:
+        condition: service_started
+    ports:
+      - "${FRONTEND_PORT:-4200}:80"
+    networks:
+      - backend-network
+
+volumes:
+  mysql_data:
+  postgres_data:
+  rabbitmq_data:
+  formation_uploads:
+
+networks:
+  backend-network:
+    driver: bridge
